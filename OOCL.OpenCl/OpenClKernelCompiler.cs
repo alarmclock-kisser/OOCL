@@ -26,10 +26,10 @@ namespace OOCL.OpenCl
 		private CLResultCode _lastError;
 		private CLResultCode lastError
 		{
-			get => _lastError;
+			get => this._lastError;
 			set
 			{
-				_lastError = value;
+				this._lastError = value;
 				if (value != CLResultCode.Success)
 				{
 					this.ErrorMessages = this.ErrorMessages.Append(value.ToString()).ToList();
@@ -41,10 +41,10 @@ namespace OOCL.OpenCl
 
 		public bool PrecompileAndCache
 		{
-			get => _precompileAndCache;
+			get => this._precompileAndCache;
 			set
 			{
-				_precompileAndCache = value;
+				this._precompileAndCache = value;
 				if (value)
 				{
 					this.Log("Precompiling and caching kernels...");

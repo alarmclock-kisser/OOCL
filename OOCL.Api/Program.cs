@@ -15,10 +15,25 @@ namespace OOCL.Api
             var builder = WebApplication.CreateBuilder(args);
 
 			// Get appsettings
-			bool isSwaggerEnabled = builder.Configuration.GetValue<bool>("UseSwagger");
-			int maxUploadSize = builder.Configuration.GetSection("UserPreferences").GetValue<int>("MaxUploadFileSizeMb") * 1_000_000;
-			bool saveMemory = builder.Configuration.GetSection("UserPreferences").GetValue<bool>("SaveMemory");
-			CommonStatics.SpareWorkers = builder.Configuration.GetSection("UserPreferences").GetValue<int>("SpareWorkers");
+			bool useSwagger = builder.Configuration.GetValue<bool>("UseSwagger");
+			int maxUploadSize = builder.Configuration.GetValue<int>("MaxUploadMb") * 1_000_000;
+			bool saveMemory = builder.Configuration.GetValue<bool>("SaveMemory");
+			int spareWorkers = builder.Configuration.GetValue<int>("SpareWorkers");
+
+			// Log retrieved settings on console
+			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ OOCL.Api \\ appsettings.json ~ ~ ~ ~ ~ User options: ~ ~ ~ ~ ~ ");
+			Console.WriteLine();
+			Console.WriteLine($"~appsettings~: {(useSwagger ? "Not u" : "U")}sing swagger UI with{(useSwagger ? "" : "out")} endpoints. ['UseSwagger'] = '{(useSwagger ? "true" : "false")}'");
+			Console.WriteLine($"~appsettings~: Max upload size set to {(maxUploadSize / 1_000_000)} MB. ['MaxUploadMb'] = '{builder.Configuration.GetValue<int>("MaxUploadMb")}'");
+			Console.WriteLine($"~appsettings~: Memory saving {(saveMemory ? "en" : "dis")}abled. ['SaveMemory'] = '{(saveMemory ? "true" : "false")}'");
+			if (saveMemory)
+			{
+				Console.WriteLine("~ ~ ~ ~ ~ ~ ~: (Warning: This will wipe all media objects except for the most recent one!)");
+			}
+			Console.WriteLine($"~appsettings~: Spare workers set to {spareWorkers}. ['SpareWorkers'] = '{spareWorkers}'" +
+				$" (using {(CommonStatics.ActiveWorkers)} of max. {CommonStatics.MaxAvailableWorkers})");
+			Console.WriteLine();
+			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ User options END ~ ~ ~ ~ ~ ");
 
 			// CORS policy
 			builder.Services.AddCors(options =>
@@ -38,9 +53,12 @@ namespace OOCL.Api
 
 			builder.Services.InjectClipboard();
 
+			// Set spare workers (threads / cores) for OpenCL
+			CommonStatics.SpareWorkers = spareWorkers;
+
 			// Swagger/OpenAPI
 			builder.Services.AddEndpointsApiExplorer();
-			if (isSwaggerEnabled)
+			if (useSwagger)
 			{
 				// Show full Swagger UI with endpoints
 				builder.Services.AddSwaggerGen();
@@ -100,7 +118,7 @@ namespace OOCL.Api
 					
 				});
 
-				if (isSwaggerEnabled)
+				if (useSwagger)
 				{
 					// Show endpoints
 					app.UseSwaggerUI();

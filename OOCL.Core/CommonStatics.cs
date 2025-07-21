@@ -8,8 +8,9 @@ namespace OOCL.Core.CommonStaticMethods
 {
 	public static class CommonStatics
 	{
-		public static int MaxAvailableWorkersCount { get; } = Environment.ProcessorCount;
+		public static int MaxAvailableWorkers { get; } = Environment.ProcessorCount;
 		public static int SpareWorkers { get; set;  } = 0;
+		public static int ActiveWorkers => MaxAvailableWorkers - SpareWorkers;
 
 		public static int AdjustWorkersCount(int maxWorkers = 0)
 		{
