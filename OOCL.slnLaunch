@@ -1,0 +1,12 @@
+[
+  {
+    "Name": "https swagger",
+    "Projects": [
+      {
+        "Path": "OOCL.Api\\OOCL.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
+  }
+]
