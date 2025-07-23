@@ -1,0 +1,118 @@
+﻿@page "/"
+@page "/home"
+
+@using OOCL.Client
+@using OOCL.Shared
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@using Radzen
+@using Radzen.Blazor
+@using System.Linq
+@using System.Net
+@using OOCL.WebApp.Pages
+@using System.Drawing
+
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject ApiClient ApiClient
+@inject ApiUrlConfig ApiConfig
+
+<!-- Title -->
+<h1 style="font-family: 'Arial Black'">OOCL WebApp -- Home<br></h1>
+
+<!-- OpenCL Section -->
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.1rem" class="rz-p-sm-12" Reverse="false">
+    <RadzenDropDown Data=@openClDeviceInfos TextProperty="DeviceName" ValueProperty="DeviceId" @bind-Value=@selectedOpenClDeviceIndex
+                    AllowClear="false" AllowFiltering="false" Style="width: 100%; max-width: 600px" Name="DropDownDevices" Placeholder="-- Select OpenCL Device --" FilterAsYouType="false" AllowSelectAll="false">
+    </RadzenDropDown>
+    <RadzenButton Name="ButtonOpenClInitialize" Style="width: 120px; font-family: Arial; background-color: #e0e0e0" Text="Initialize" ButtonType="Radzen.ButtonType.Submit" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Medium" Variant="Radzen.Variant.Filled" Disabled="false" Click="@ButtonOpenClInitializeClick"></RadzenButton>
+</RadzenStack>
+<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.1rem" class="rz-p-sm-12" Reverse="false">
+    <RadzenText Text="OpenCL Service Status:" TextStyle="TextStyle.Subtitle1" />
+    <RadzenText Text="@openClServiceInfo.Status" Style="@(openClServiceInfo.Initialized ? "color: green" : "color: red")" />
+</RadzenStack>
+
+@code {
+    [CascadingParameter]
+    public Func<string, bool, Task> AddLogEntry { get; set; } = (msg, overwrite) => Task.CompletedTask;
+    private Task AddLog(string message) => AddLogEntry(message, false);
+    private Task AddLog(string message, bool overwrite) => AddLogEntry(message, overwrite);
+
+    private int selectedOpenClDeviceIndex = -1;
+    private OpenClServiceInfo openClServiceInfo = new OpenClServiceInfo(null);
+    private OpenClUsageInfo openClUsageInfo = new OpenClUsageInfo(null);
+
+    private IEnumerable<OpenClDeviceInfo> openClDeviceInfos = [];
+    private IEnumerable<OpenClKernelInfo> openClKernelInfos = [];
+    private IEnumerable<OpenClMemoryInfo> openClMemoryInfos = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AddLog("Initializing Control page...");
+        await RefreshInfos();
+        await SelectOpenClDeviceByName("Core");
+    }
+
+    protected async Task RefreshInfos()
+    {
+        // Get OpenCL infos
+        openClServiceInfo = await ApiClient.GetOpenClServiceInfo();
+        openClUsageInfo = await ApiClient.GetOpenClUsageInfo();
+        openClDeviceInfos = await ApiClient.GetOpenClDeviceInfos();
+        openClKernelInfos = await ApiClient.GetOpenClKernelInfos();
+        openClMemoryInfos = await ApiClient.GetOpenClMemoryInfos();
+        await AddLog($"Refreshed infos.");
+
+        StateHasChanged();
+    }
+
+    protected async Task SelectOpenClDeviceByName(string name = "Intel")
+    {
+        if (!openClDeviceInfos.Any())
+        {
+            await AddLog($"No devices loaded yet to select from.");
+            StateHasChanged();
+            return;
+        }
+
+        var foundDevice = openClDeviceInfos.FirstOrDefault(d => d.DeviceName.Contains(name, StringComparison.OrdinalIgnoreCase));
+        if (foundDevice != null)
+        {
+            selectedOpenClDeviceIndex = foundDevice.DeviceId;
+            await AddLog($"Selected device: '{foundDevice.DeviceName}' (ID: {foundDevice.DeviceId})");
+        }
+        else
+        {
+            await AddLog($"No device found with name containing '{name}'.");
+        }
+        StateHasChanged();
+
+        await Task.Yield();
+    }
+
+    protected async Task ButtonOpenClInitializeClick(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        if (selectedOpenClDeviceIndex == -1)
+        {
+            await AddLog("Please select a CL-Device to initialize.");
+            StateHasChanged();
+            return;
+        }
+        
+        await AddLog($"Started initializing CL-Device with ID {selectedOpenClDeviceIndex} ...");
+        StateHasChanged();
+
+        openClServiceInfo = await ApiClient.InitializeOpenCl(selectedOpenClDeviceIndex);
+        if (openClServiceInfo.Initialized)
+        {
+            await AddLog($"OpenCL device initialized successfully: {openClServiceInfo.DeviceName} [{openClServiceInfo.DeviceId}]");
+        }
+        else
+        {
+            await AddLog($"Failed to initialize OpenCL device [{selectedOpenClDeviceIndex}].");
+        }
+
+        await RefreshInfos();
+    }
+}

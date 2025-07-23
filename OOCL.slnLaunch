@@ -8,5 +8,20 @@
         "DebugTarget": "https"
       }
     ]
+  },
+  {
+    "Name": "https FULL",
+    "Projects": [
+      {
+        "Path": "OOCL.Api\\OOCL.Api.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "OOCL.WebApp\\OOCL.WebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
   }
 ]

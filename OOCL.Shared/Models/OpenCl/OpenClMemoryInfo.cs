@@ -8,21 +8,21 @@ namespace OOCL.Shared
 {
 	public class OpenClMemoryInfo : OpenClModelBase
 	{
-		public Guid Id { get; private set; } = Guid.Empty;
-		public IEnumerable<string> Pointers { get; private set; } = [];
-		public IEnumerable<string> Lengths { get; private set; } = [];
+		public Guid Id { get; set; } = Guid.Empty;
+		public IEnumerable<string> Pointers { get; set; } = [];
+		public IEnumerable<string> Lengths { get; set; } = [];
 
-		public string IndexPointer { get; private set; } = "0";
+		public string IndexPointer { get; set; } = "0";
 
-		public string IndexLength { get; private set; } = "0";
-		public int Count { get; private set; } = 0;
+		public string IndexLength { get; set; } = "0";
+		public int Count { get; set; } = 0;
 
-		public string TotalLength { get; private set; } = "0";
+		public string TotalLength { get; set; } = "0";
 
-		public int DataTypeSize { get; private set; } = 0;
-		public string DataTypeName { get; private set; } = "object";
+		public int DataTypeSize { get; set; } = 0;
+		public string DataTypeName { get; set; } = "object";
 
-		public string TotalSizeBytes { get; private set; } = "0";
+		public string TotalSizeBytes { get; set; } = "0";
 
 
 		public OpenClMemoryInfo() : base()

@@ -9,16 +9,16 @@ namespace OOCL.Shared
 {
 	public class OpenClUsageInfo : OpenClModelBase
 	{
-		public string TotalMemory { get; private set; } = "0";
+		public string TotalMemory { get; set; } = "0";
 
-		public string UsedMemory { get; private set; } = "0";
-		public string FreeMemory { get; private set; } = "0";
+		public string UsedMemory { get; set; } = "0";
+		public string FreeMemory { get; set; } = "0";
 		private float usagePercentage = 0.0f;
-		public string UsagePercentage { get; private set; } = "0.0";
+		public string UsagePercentage { get; set; } = "0.0";
 
 		public string SizeUnit { get; set; } = "Bytes";
 
-		public IEnumerable<PieChartData> PieChart { get; private set; } = [];
+		public IEnumerable<PieChartData> PieChart { get; set; } = [];
 
 		public string Magnitude { get; set; } = "MBytes";
 

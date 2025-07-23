@@ -1,0 +1,3406 @@
+{
+	"openapi": "3.0.1",
+	"info": {
+		"title": "OOCL.Api",
+		"version": "1.0"
+	},
+	"paths": {
+		"/api/Audio/audios": {
+			"get": {
+				"tags": [
+					"Audio"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/AudioObjInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/AudioObjInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/AudioObjInfo"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/{guid}/info": {
+			"get": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/{guid}/remove": {
+			"delete": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "boolean"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/upload": {
+			"post": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "copyGuid",
+						"in": "query",
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								}
+							},
+							"encoding": {
+								"file": {
+									"style": "form"
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/{guid}/download": {
+			"get": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/{guid}/waveform64": {
+			"get": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioData"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioData"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioData"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/{guid}/play/{volume}": {
+			"post": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "volume",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "float",
+							"default": 0.66
+						}
+					}
+				],
+				"responses": {
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/{guid}/stop": {
+			"post": {
+				"tags": [
+					"Audio"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Audio/audios/stopAll": {
+			"post": {
+				"tags": [
+					"Audio"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "integer",
+									"format": "int32"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "integer",
+									"format": "int32"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "integer",
+									"format": "int32"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images": {
+			"get": {
+				"tags": [
+					"Image"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ImageObjInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ImageObjInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ImageObjInfo"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images/{guid}/info": {
+			"get": {
+				"tags": [
+					"Image"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images/{guid}/remove": {
+			"delete": {
+				"tags": [
+					"Image"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "boolean"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images/empty/{width}/{height}": {
+			"post": {
+				"tags": [
+					"Image"
+				],
+				"parameters": [
+					{
+						"name": "width",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 1920
+						}
+					},
+					{
+						"name": "height",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 1080
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images/upload": {
+			"post": {
+				"tags": [
+					"Image"
+				],
+				"parameters": [
+					{
+						"name": "copyGuid",
+						"in": "query",
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"file": {
+										"type": "string",
+										"format": "binary"
+									}
+								}
+							},
+							"encoding": {
+								"file": {
+									"style": "form"
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images/{guid}/download/{format}": {
+			"get": {
+				"tags": [
+					"Image"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "format",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "bmp"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "string",
+									"format": "binary"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/Image/images/{guid}/image64/{format}": {
+			"get": {
+				"tags": [
+					"Image"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "format",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "bmp"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageData"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageData"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageData"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/status": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/devices": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClDeviceInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClDeviceInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClDeviceInfo"
+									}
+								}
+							}
+						}
+					},
+					"204": {
+						"description": "No Content",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClDeviceInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClDeviceInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClDeviceInfo"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/devices/{deviceId}/initialize": {
+			"post": {
+				"tags": [
+					"OpenCl"
+				],
+				"parameters": [
+					{
+						"name": "deviceId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 2
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/dispose": {
+			"delete": {
+				"tags": [
+					"OpenCl"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClServiceInfo"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/usage": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClUsageInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClUsageInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClUsageInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClUsageInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClUsageInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OpenClUsageInfo"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/memory": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							}
+						}
+					},
+					"204": {
+						"description": "No Content",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClMemoryInfo"
+									}
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/kernels/{filter}": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"parameters": [
+					{
+						"name": "filter",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClKernelInfo"
+									}
+								}
+							},
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClKernelInfo"
+									}
+								}
+							},
+							"text/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/OpenClKernelInfo"
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/executeMandelbrot/{kernel}/{version}/{width}/{height}/{zoom}/{x}/{y}/{coeff}/{r}/{g}/{b}/{copyGuid}/{allowTempSession}": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"parameters": [
+					{
+						"name": "kernel",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "mandelbrotPrecise"
+						}
+					},
+					{
+						"name": "version",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "01"
+						}
+					},
+					{
+						"name": "width",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 1920
+						}
+					},
+					{
+						"name": "height",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 1080
+						}
+					},
+					{
+						"name": "zoom",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "double",
+							"default": 1
+						}
+					},
+					{
+						"name": "x",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "double",
+							"default": 0
+						}
+					},
+					{
+						"name": "y",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "double",
+							"default": 0
+						}
+					},
+					{
+						"name": "coeff",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 8
+						}
+					},
+					{
+						"name": "r",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0
+						}
+					},
+					{
+						"name": "g",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0
+						}
+					},
+					{
+						"name": "b",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 0
+						}
+					},
+					{
+						"name": "copyGuid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					},
+					{
+						"name": "allowTempSession",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/executeTimestretch/{guid}/{kernel}/{version}/{factor}/{chunkSize}/{overlap}/{copyGuid}/{allowTempSession}": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "kernel",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "timestretch_double"
+						}
+					},
+					{
+						"name": "version",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"default": "03"
+						}
+					},
+					{
+						"name": "factor",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "double",
+							"default": 0.8
+						}
+					},
+					{
+						"name": "chunkSize",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32",
+							"default": 16384
+						}
+					},
+					{
+						"name": "overlap",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "float",
+							"default": 0.5
+						}
+					},
+					{
+						"name": "copyGuid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					},
+					{
+						"name": "allowTempSession",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "boolean",
+							"default": true
+						}
+					}
+				],
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/moveAudio/{guid}": {
+			"post": {
+				"tags": [
+					"OpenCl"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AudioObjInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/OpenCl/moveImage/{guid}": {
+			"post": {
+				"tags": [
+					"OpenCl"
+				],
+				"parameters": [
+					{
+						"name": "guid",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ImageObjInfo"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"AudioData": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"filepath": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"onHost": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"sizeMb": {
+						"type": "number",
+						"format": "float",
+						"readOnly": true
+					},
+					"pointerHex": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataStructure": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"width": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"height": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"base64Format": {
+						"type": "string",
+						"nullable": true
+					},
+					"base64Image": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"AudioObjInfo": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"filepath": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"onHost": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"sizeMb": {
+						"type": "number",
+						"format": "float",
+						"readOnly": true
+					},
+					"pointerHex": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataStructure": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"samplerate": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"channels": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"bitdepth": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"lenght": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"chunkSize": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"overlapSize": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"form": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"stretchFactor": {
+						"type": "number",
+						"format": "double",
+						"readOnly": true
+					},
+					"playing": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"playbackState": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"volume": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"duration": {
+						"type": "number",
+						"format": "double",
+						"readOnly": true
+					},
+					"currentTime": {
+						"type": "number",
+						"format": "double",
+						"readOnly": true
+					},
+					"lastLoadingTime": {
+						"type": "number",
+						"format": "double"
+					},
+					"lastProcessingTime": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorMessage": {
+						"type": "string",
+						"nullable": true
+					},
+					"bpm": {
+						"type": "number",
+						"format": "float"
+					}
+				},
+				"additionalProperties": false
+			},
+			"ImageData": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"filepath": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"onHost": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"sizeMb": {
+						"type": "number",
+						"format": "float",
+						"readOnly": true
+					},
+					"pointerHex": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataStructure": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"width": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"height": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"base64Format": {
+						"type": "string",
+						"nullable": true
+					},
+					"base64Image": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"ImageObjInfo": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"filepath": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"onHost": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"sizeMb": {
+						"type": "number",
+						"format": "float",
+						"readOnly": true
+					},
+					"pointerHex": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataStructure": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"width": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"height": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"channels": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"bitdepth": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"lastLoadingTime": {
+						"type": "number",
+						"format": "double"
+					},
+					"lastProcessingTime": {
+						"type": "number",
+						"format": "double"
+					},
+					"errorMessage": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"OpenClDeviceInfo": {
+				"type": "object",
+				"properties": {
+					"index": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"online": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"status": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"errorMessages": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"timestamp": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"tickAge": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"deviceId": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"deviceName": {
+						"type": "string",
+						"nullable": true
+					},
+					"deviceType": {
+						"type": "string",
+						"nullable": true
+					},
+					"platformName": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"OpenClKernelInfo": {
+				"type": "object",
+				"properties": {
+					"index": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"online": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"status": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"errorMessages": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"timestamp": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"tickAge": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"argumentsCount": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"argumentNames": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"argumentType": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"inputPointerType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"outputPointerType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"mediaType": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"functionName": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"OpenClMemoryInfo": {
+				"type": "object",
+				"properties": {
+					"index": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"online": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"status": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"errorMessages": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"timestamp": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"tickAge": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"id": {
+						"type": "string",
+						"format": "uuid",
+						"readOnly": true
+					},
+					"pointers": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"lengths": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"indexPointer": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"indexLength": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"count": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"totalLength": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"dataTypeSize": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"dataTypeName": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"totalSizeBytes": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"OpenClServiceInfo": {
+				"type": "object",
+				"properties": {
+					"index": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"online": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"status": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"errorMessages": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"timestamp": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"tickAge": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"deviceId": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"deviceName": {
+						"type": "string",
+						"nullable": true
+					},
+					"platformName": {
+						"type": "string",
+						"nullable": true
+					},
+					"initialized": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"OpenClUsageInfo": {
+				"type": "object",
+				"properties": {
+					"index": {
+						"type": "integer",
+						"format": "int32",
+						"readOnly": true
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"type": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"online": {
+						"type": "boolean",
+						"readOnly": true
+					},
+					"status": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"meta": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"errorMessages": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"timestamp": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"tickAge": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"totalMemory": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"usedMemory": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"freeMemory": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"usagePercentage": {
+						"type": "string",
+						"nullable": true,
+						"readOnly": true
+					},
+					"sizeUnit": {
+						"type": "string",
+						"nullable": true
+					},
+					"pieChart": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/PieChartData"
+						},
+						"nullable": true,
+						"readOnly": true
+					},
+					"magnitude": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"PieChartData": {
+				"type": "object",
+				"properties": {
+					"label": {
+						"type": "string",
+						"nullable": true
+					},
+					"value": {
+						"type": "number",
+						"format": "float"
+					}
+				},
+				"additionalProperties": false
+			},
+			"ProblemDetails": {
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"nullable": true
+					},
+					"title": {
+						"type": "string",
+						"nullable": true
+					},
+					"status": {
+						"type": "integer",
+						"format": "int32",
+						"nullable": true
+					},
+					"detail": {
+						"type": "string",
+						"nullable": true
+					},
+					"instance": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": {}
+			}
+		}
+	}
+}

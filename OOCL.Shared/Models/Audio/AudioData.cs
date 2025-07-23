@@ -14,10 +14,10 @@ namespace OOCL.Shared
 
 	public class AudioData : MediaModelBase
 	{
-		public int Width { get; private set; } = 0;
-		public int Height { get; private set; } = 0;
+		public int Width { get; set; } = 0;
+		public int Height { get; set; } = 0;
 		public string Base64Format { get; set; } = "png";
-		public string Base64Image { get; private set; } = string.Empty;
+		public string Base64Image { get; set; } = string.Empty;
 
 		public AudioData() : base()
 		{
@@ -25,16 +25,22 @@ namespace OOCL.Shared
 		}
 
 		[JsonConstructor]
-		public AudioData(AudioObj? obj = null) : base(obj)
+		public AudioData(IMediaObj? obj = null) : base(obj)
 		{
 			if (obj == null)
 			{
 				return;
 			}
 
-			this.Width = obj.WaveformWidth;
-			this.Height = obj.WaveformHeight;
-			this.Base64Image = obj.AsBase64Image(this.Base64Format).Result;
+			var audioObj = obj as AudioObj;
+			if (audioObj == null)
+			{
+				return;
+			}
+
+			this.Width = audioObj.WaveformWidth;
+			this.Height = audioObj.WaveformHeight;
+			this.Base64Image = audioObj.AsBase64Image(this.Base64Format).Result;
 		}
 	}
 }

@@ -8,10 +8,10 @@ namespace OOCL.Shared
 
 	public class ImageData : MediaModelBase
 	{
-		public int Width { get; private set; } = 0;
-		public int Height { get; private set; } = 0;
+		public int Width { get; set; } = 0;
+		public int Height { get; set; } = 0;
 		public string Base64Format { get; set; } = "png";
-		public string Base64Image { get; private set; } = string.Empty;
+		public string Base64Image { get; set; } = string.Empty;
 
 
 		public ImageData()
@@ -20,16 +20,22 @@ namespace OOCL.Shared
 		}
 
 		[JsonConstructor]
-		public ImageData(ImageObj? obj = null) : base(obj)
+		public ImageData(IMediaObj? obj = null) : base(obj)
 		{
 			if (obj == null)
 			{
 				return;
 			}
 
-			this.Width = obj.Width;
-			this.Height = obj.Height;
-			this.Base64Image = obj.AsBase64Image("png").Result;
+			var imageObj = obj as ImageObj;
+			if (imageObj == null)
+			{
+				return;
+			}
+
+			this.Width = imageObj.Width;
+			this.Height = imageObj.Height;
+			this.Base64Image = imageObj.AsBase64Image("png").Result;
 
 		}
 	}

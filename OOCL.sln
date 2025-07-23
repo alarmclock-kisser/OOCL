@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36212.18 d17.14
+VisualStudioVersion = 17.14.36212.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OOCL.Api", "OOCL.Api\OOCL.Api.csproj", "{58EDD609-DF85-46F3-8FA7-C9662E0074E9}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OOCL.Shared", "OOCL.Shared\OOCL.Shared.csproj", "{E9157DFA-40B2-4E5C-A56C-E08ED9F39703}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OOCL.Client", "OOCL.Client\OOCL.Client.csproj", "{5A7DACEC-D122-4A7F-B74D-1992C713A930}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OOCL.WebApp", "OOCL.WebApp\OOCL.WebApp.csproj", "{35373124-FD27-440E-ADA0-BED08D4709B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{5A7DACEC-D122-4A7F-B74D-1992C713A930}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A7DACEC-D122-4A7F-B74D-1992C713A930}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A7DACEC-D122-4A7F-B74D-1992C713A930}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35373124-FD27-440E-ADA0-BED08D4709B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35373124-FD27-440E-ADA0-BED08D4709B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35373124-FD27-440E-ADA0-BED08D4709B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35373124-FD27-440E-ADA0-BED08D4709B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

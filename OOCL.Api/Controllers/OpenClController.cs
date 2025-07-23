@@ -55,409 +55,466 @@ namespace OOCL.Api.Controllers
             this.clipboard = clipboard;
         }
 
-        [HttpGet("status")]
-        [ProducesResponseType(typeof(OpenClServiceInfo), 200)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<OpenClServiceInfo>> GetStatus()
-        {
+		[HttpGet("status")]
+		[ProducesResponseType(typeof(OpenClServiceInfo), 200)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<OpenClServiceInfo>> GetStatus()
+		{
 			try
-            {
-                return this.Ok(await this.statusInfoTask);
+			{
+				return this.Ok(await this.statusInfoTask);
 			}
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return this.StatusCode(500, ex.Message);
-            }
-        }
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Error getting OpenCL status",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+		}
 
-        [HttpGet("devices")]
-        [ProducesResponseType(typeof(IEnumerable<OpenClDeviceInfo>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<OpenClDeviceInfo>>> GetDevices()
-        {
-            try
-            {
-                var infos = await this.deviceInfosTask;
+		[HttpGet("devices")]
+		[ProducesResponseType(typeof(IEnumerable<OpenClDeviceInfo>), 200)]
+		[ProducesResponseType(typeof(OpenClDeviceInfo[]), 204)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<IEnumerable<OpenClDeviceInfo>>> GetDevices()
+		{
+			try
+			{
+				var infos = await this.deviceInfosTask;
+				return this.Ok(infos.Any() ? infos : Array.Empty<OpenClDeviceInfo>());
+			}
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Error getting devices",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+		}
 
-                if (!infos.Any())
-                {
-                    return this.NoContent();
-                }
-
-                return this.Ok(infos);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return this.StatusCode(500, ex.Message);
-            }
-        }
-
-        [HttpPost("devices/{deviceId}/initialize")]
-        [ProducesResponseType(typeof(OpenClServiceInfo), 201)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<OpenClServiceInfo>> Initialize(int deviceId = 2)
-        {
+		[HttpPost("devices/{deviceId}/initialize")]
+		[ProducesResponseType(typeof(OpenClServiceInfo), 201)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<OpenClServiceInfo>> Initialize(int deviceId = 2)
+		{
 			int count = this.openClService.DeviceCount;
 
 			if (deviceId < 0 || deviceId >= count)
 			{
-				return this.NotFound($"Invalid device ID (max:{count})");
+				return this.NotFound(new ProblemDetails
+				{
+					Title = "Invalid device ID",
+					Detail = $"Invalid device ID (max:{count})",
+					Status = 404
+				});
 			}
 
 			try
-            {
+			{
 				await Task.Run(() => this.openClService.Initialize(deviceId));
+				var status = await this.statusInfoTask;
 
-				if (!(await this.statusInfoTask).Initialized)
-                {
-                    return this.BadRequest("OpenCL service could not be initialized. Device might not be available.");
+				if (!status.Initialized)
+				{
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Initialization failed",
+						Detail = "OpenCL service could not be initialized. Device might not be available.",
+						Status = 400
+					});
 				}
 
-                return this.Created($"api/opencl/status", await this.statusInfoTask);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("dispose")]
-        [ProducesResponseType(typeof(OpenClServiceInfo), 200)]
-        [ProducesResponseType(204)]
-		[ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<OpenClServiceInfo>> Dispose()
-        {
-            var initialized = (await this.statusInfoTask).Initialized;
-            if (!initialized)
-            {
-                return this.NoContent();
+				return this.Created($"api/opencl/status", status);
 			}
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Initialization error",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+		}
 
+		[HttpDelete("dispose")]
+		[ProducesResponseType(typeof(OpenClServiceInfo), 200)]
+		[ProducesResponseType(typeof(OpenClServiceInfo), 400)]
+		[ProducesResponseType(typeof(OpenClServiceInfo), 500)]
+		public async Task<ActionResult<OpenClServiceInfo>> Dispose()
+		{
 			try
-            {
-                await Task.Run(() => this.openClService.Dispose());
+			{
+				await Task.Run(() => this.openClService.Dispose());
 
 				if ((await this.statusInfoTask).Initialized)
-                {
-                    return this.BadRequest("OpenCL service is still initialized. Please ensure it is properly disposed.");
-                }
+				{
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Disposing failed",
+						Detail = "OpenCL service could not be disposed since it's still initialized on " + (await this.statusInfoTask).DeviceName.ToUpper(),
+						Status = 400
+					});
+				}
 
-                return this.Ok(await this.statusInfoTask);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+				return this.Ok(await this.statusInfoTask);
+			}
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Dispose error",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+		}
 
-        [HttpGet("usage")]
-        [ProducesResponseType(typeof(OpenClUsageInfo), 200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<OpenClUsageInfo>> GetUsage()
-        {
-            if (this.openClService.MemoryRegister == null)
-            {
-                return this.NotFound("OpenCL memory register is not initialized.");
-            }
-
-            try
-            {
-				return this.Ok(await this.usageInfoTask);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("memory")]
-        [ProducesResponseType(typeof(IEnumerable<OpenClMemoryInfo>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<OpenClMemoryInfo>>> GetMemoryObjects()
-        {
-            if (this.openClService.MemoryRegister == null)
-            {
-                return this.NotFound("OpenCL memory register is not initialized.");
-            }
-
-            try
-            {
-				if (!(await this.memoryInfosTask).Any())
-                {
-                    return this.NoContent();
-                }
-
-                return this.Ok(await this.memoryInfosTask);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("kernels/{filter}")]
-        [ProducesResponseType(typeof(IEnumerable<OpenClKernelInfo>), 200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<IEnumerable<OpenClKernelInfo>>> GetKernels(string filter = "")
-        {
-            this.kernelFilter = filter;
-
-			if (this.openClService.KernelCompiler == null)
-            {
-                return this.NotFound("OpenCL kernel compiler is not initialized.");
-            }
-
-            try
-            {
-                if (!(await this.kernelInfosTask).Any())
-                {
-                    if (!string.IsNullOrEmpty(filter))
-                    {
-                        return this.NotFound($"No kernels with function name found containing '{filter}'");
-					}
-
-					return this.NoContent();
-                }
-
-                return this.Ok(await this.kernelInfosTask);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet("executeMandelbrot/{kernel}/{version}/{width}/{height}/{zoom}/{x}/{y}/{coeff}/{r}/{g}/{b}/{copyGuid}/{allowTempSession}")]
-        [ProducesResponseType(typeof(ImageObjInfo), 201)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<ActionResult<ImageObjInfo>> ExecuteMandelbrot(string kernel = "mandelbrotPrecise", string version = "01",
-            int width = 1920, int height = 1080, double zoom = 1.0, double x = 0.0, double y = 0.0, int coeff = 8,
-            int r = 0, int g = 0, int b = 0, bool copyGuid = true, bool allowTempSession = true)
-        {
-            bool temp = false;
-
-            try
-            {
-                // Get status
-                var status = await Task.Run(() => new OpenClServiceInfo(this.openClService));
-				if (!(status).Initialized)
-                {
-                    if (allowTempSession)
-                    {
-                        int count = this.openClService.DeviceCount;
-                        await Task.Run(() => this.openClService.Initialize(count - 1));
-                        temp = true;
-                    }
-
-					if (!(await this.statusInfoTask).Initialized)
-                    {
-                        return this.BadRequest("OpenCL service is not initialized. Please initialize it first and check devies available.");
-                    }
-                }
-
-                // Create an empty image
-                var obj = await Task.Run(() => this.imageCollection.PopEmpty(new(width, height), true));
-                if (obj == null || !this.imageCollection.Images.Contains(obj))
-                {
-                    return this.NotFound("Failed to create empty image or couldnt add it to the collection.");
-                }
-
-                // Build variable arguments
-                object[] variableArgs =
-                    [
-                        0, 0,
-                        width, height,
-                        zoom, x, y,
-                        coeff,
-                        r, g, b
-                    ];
-
-                Stopwatch sw = Stopwatch.StartNew();
-
-                // Call service accessor
-                var result = await Task.Run(() => this.openClService.ExecuteImageKernel(obj, kernel, version, variableArgs));
-
-                sw.Stop();
-
-                // Get image obj info
-                var info = await Task.Run(() => new ImageObjInfo(obj));
-				if (!info.OnHost)
-                {
-                    return this.NotFound("Failed to execute OpenCL kernel or image is not on the host after execution call.");
-                }
-
-                // Optionally copy guid to clipboard
-                if (copyGuid)
-                {
-                    await this.clipboard.SetTextAsync(info.Id.ToString());
-                }
-
-                return this.Created($"api/image/images/{info.Id}/image64", info);
-            }
-            catch (Exception ex)
-            {
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-            finally
-            {
-                if (temp)
-                {
-                    await Task.Run(() => this.openClService.Dispose());
-                }
-            }
-        }
-
-        [HttpGet("executeTimestretch/{guid}/{kernel}/{version}/{factor}/{chunkSize}/{overlap}/{copyGuid}/{allowTempSession}")]
-        [ProducesResponseType(typeof(AudioObjInfo), 201)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-		public async Task<ActionResult<AudioObjInfo>> ExecuteTimestretch(Guid guid, string kernel = "timestretch_double",
-            string version = "03", double factor = 0.8, int chunkSize = 16384, float overlap = 0.5f,
-            bool copyGuid = true, bool allowTempSession = true)
-        {
-            // Find audio obj
-            var obj = this.audioCollection[guid];
-            if (obj == null || obj.Id == Guid.Empty)
-            {
-                return this.NotFound($"No audio object found with Guid '{guid}'");
-            }
-
-            bool temp = false;
-
-			// Verify initialized
+		[HttpGet("usage")]
+		[ProducesResponseType(typeof(OpenClUsageInfo), 200)]
+		[ProducesResponseType(typeof(OpenClUsageInfo), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<OpenClUsageInfo>> GetUsage()
+		{
 			try
-            {
+			{
+				if (this.openClService.MemoryRegister == null)
+				{
+					return this.Ok(new OpenClUsageInfo());
+				}
+
+				return this.Ok(await this.usageInfoTask);
+			}
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Error getting usage info",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+		}
+
+		[HttpGet("memory")]
+		[ProducesResponseType(typeof(IEnumerable<OpenClMemoryInfo>), 200)]
+		[ProducesResponseType(typeof(OpenClMemoryInfo[]), 204)]
+		[ProducesResponseType(typeof(OpenClMemoryInfo[]), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<IEnumerable<OpenClMemoryInfo>>> GetMemoryObjects()
+		{
+			try
+			{
+				if (this.openClService.MemoryRegister == null)
+				{
+					return this.Ok(Array.Empty<OpenClMemoryInfo>());
+				}
+
+				var infos = await this.memoryInfosTask;
+				return this.Ok(infos.Any() ? infos : Array.Empty<OpenClMemoryInfo>());
+			}
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Error getting memory objects",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+		}
+
+		[HttpGet("kernels/{filter?}")]
+		public async Task<ActionResult<IEnumerable<OpenClKernelInfo>>> GetKernels(string? filter = null)
+		{
+			if (this.openClService.KernelCompiler == null)
+			{
+				return this.Ok(Array.Empty<OpenClKernelInfo>());
+			}
+
+			var kernels = await this.kernelInfosTask;
+			return this.Ok(kernels.Any() ? kernels : Array.Empty<OpenClKernelInfo>());
+		}
+
+		[HttpGet("executeMandelbrot/{kernel}/{version}/{width}/{height}/{zoom}/{x}/{y}/{coeff}/{r}/{g}/{b}/{copyGuid}/{allowTempSession}")]
+		[ProducesResponseType(typeof(ImageObjInfo), 201)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<ImageObjInfo>> ExecuteMandelbrot(
+	string kernel = "mandelbrotPrecise",
+	string version = "01",
+	int width = 1920,
+	int height = 1080,
+	double zoom = 1.0,
+	double x = 0.0,
+	double y = 0.0,
+	int coeff = 8,
+	int r = 0,
+	int g = 0,
+	int b = 0,
+	bool copyGuid = true,
+	bool allowTempSession = true)
+		{
+			bool temp = false;
+
+			try
+			{
+				// Get status
 				if (!(await this.statusInfoTask).Initialized)
 				{
-                    if (allowTempSession)
-                    {
-                        int count = this.openClService.DeviceCount;
-                        await Task.Run(() => this.openClService.Initialize(count - 1));
-                        temp = true;
-                    }
+					if (allowTempSession)
+					{
+						int count = this.openClService.DeviceCount;
+						await Task.Run(() => this.openClService.Initialize(count - 1));
+						temp = true;
+					}
 
 					if (!(await this.statusInfoTask).Initialized)
-                    {
-                        return this.BadRequest("OpenCL service is not initialized. Please initialize it first.");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return this.BadRequest("Error while trying to initialize OpenCL, aborting");
-            }
+					{
+						return this.BadRequest(new ProblemDetails
+						{
+							Title = "OpenCL Not Initialized",
+							Detail = "OpenCL service is not initialized. Please initialize it first and check devices available.",
+							Status = 400
+						});
+					}
+				}
 
-            // Build variable args (factor)
-            Dictionary<string, object> optionalArguments = [];
-            if (kernel.Contains("double", StringComparison.OrdinalIgnoreCase))
-            {
-                optionalArguments.Add("factor", (double)factor);
-            }
-            else
-            {
-                optionalArguments.Add("factor", (float)factor);
-            }
+				// Create an empty image
+				var obj = await Task.Run(() => this.imageCollection.PopEmpty(new(width, height), true));
+				if (obj == null || !this.imageCollection.Images.Contains(obj))
+				{
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Image Creation Failed",
+						Detail = "Failed to create empty image or couldn't add it to the collection.",
+						Status = 404
+					});
+				}
 
-            Stopwatch sw = Stopwatch.StartNew();
+				// Build variable arguments
+				object[] variableArgs = [0, 0, width, height, zoom, x, y, coeff, r, g, b];
 
-            try
-            {
-                var result = await this.openClService.ExecuteAudioKernel(obj, kernel, version, chunkSize, overlap, optionalArguments, true);
+				Stopwatch sw = Stopwatch.StartNew();
+				var result = await Task.Run(() =>
+					this.openClService.ExecuteImageKernel(obj, kernel, version, variableArgs));
+				sw.Stop();
+
+				var info = await Task.Run(() => new ImageObjInfo(obj));
+				if (!info.OnHost)
+				{
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Execution Failed",
+						Detail = "Failed to execute OpenCL kernel or image is not on the host after execution call.",
+						Status = 404
+					});
+				}
+
+				if (copyGuid)
+				{
+					await this.clipboard.SetTextAsync(info.Id.ToString());
+				}
+
+				return this.Created($"api/image/images/{info.Id}/image64", info);
 			}
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return this.StatusCode(500, "Error: " + ex.Message);
-            }
-            finally
-            {
-                sw.Stop();
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Mandelbrot Execution Error",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+			finally
+			{
+				if (temp)
+				{
+					await Task.Run(() => this.openClService.Dispose());
+				}
+			}
+		}
 
-                if (temp)
-                {
-                    await Task.Run(() => this.openClService.Dispose());
-                }
-            }
+		[HttpGet("executeTimestretch/{guid}/{kernel}/{version}/{factor}/{chunkSize}/{overlap}/{copyGuid}/{allowTempSession}")]
+		[ProducesResponseType(typeof(AudioObjInfo), 201)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<AudioObjInfo>> ExecuteTimestretch(
+			Guid guid,
+			string kernel = "timestretch_double",
+			string version = "03",
+			double factor = 0.8,
+			int chunkSize = 16384,
+			float overlap = 0.5f,
+			bool copyGuid = true,
+			bool allowTempSession = true)
+		{
+			bool temp = false;
 
-            var info = await Task.Run(() => new AudioObjInfo(obj));
+			try
+			{
+				var obj = this.audioCollection[guid];
+				if (obj == null || obj.Id == Guid.Empty)
+				{
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Audio Not Found",
+						Detail = $"No audio object found with Guid '{guid}'",
+						Status = 404
+					});
+				}
 
-			return this.Created($"api/audio/audios/{obj.Id}/info", info);
-        }
+				if (!(await this.statusInfoTask).Initialized)
+				{
+					if (allowTempSession)
+					{
+						int count = this.openClService.DeviceCount;
+						await Task.Run(() => this.openClService.Initialize(count - 1));
+						temp = true;
+					}
+
+					if (!(await this.statusInfoTask).Initialized)
+					{
+						return this.BadRequest(new ProblemDetails
+						{
+							Title = "OpenCL Not Initialized",
+							Detail = "OpenCL service is not initialized. Please initialize it first.",
+							Status = 400
+						});
+					}
+				}
+
+				var optionalArguments = new Dictionary<string, object>
+				{
+					["factor"] = kernel.Contains("double", StringComparison.OrdinalIgnoreCase)
+						? (double) factor
+						: (float) factor
+				};
+
+				Stopwatch sw = Stopwatch.StartNew();
+				var result = await this.openClService.ExecuteAudioKernel(
+					obj, kernel, version, chunkSize, overlap, optionalArguments, true);
+				sw.Stop();
+
+				var info = await Task.Run(() => new AudioObjInfo(obj));
+				return this.Created($"api/audio/audios/{obj.Id}/info", info);
+			}
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Timestretch Execution Error",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
+			finally
+			{
+				if (temp)
+				{
+					await Task.Run(() => this.openClService.Dispose());
+				}
+			}
+		}
 
 		[HttpPost("moveAudio/{guid}")]
 		[ProducesResponseType(typeof(AudioObjInfo), 200)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(500)]
-        public async Task<ActionResult<AudioObjInfo>> MoveAudio(Guid guid)
-        {
-            var obj = this.audioCollection[guid];
-            if (obj == null || obj.Id == Guid.Empty)
-            {
-                return this.NotFound($"No audio object found with Guid '{guid}'");
-            }
-
-            var wasOnHost = new AudioObjInfo(obj).OnHost;
-
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
+		public async Task<ActionResult<AudioObjInfo>> MoveAudio(Guid guid)
+		{
 			try
-            {
-                if (!(await this.statusInfoTask).Initialized)
-                {
-                    return this.BadRequest("OpenCL service is not initialized. Please initialize it first.");
+			{
+				var obj = this.audioCollection[guid];
+				if (obj == null || obj.Id == Guid.Empty)
+				{
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Audio Not Found",
+						Detail = $"No audio object found with Guid '{guid}'",
+						Status = 404
+					});
+				}
+
+				var wasOnHost = new AudioObjInfo(obj).OnHost;
+
+				if (!(await this.statusInfoTask).Initialized)
+				{
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "OpenCL Not Initialized",
+						Detail = "OpenCL service is not initialized. Please initialize it first.",
+						Status = 400
+					});
 				}
 
 				var result = await this.openClService.MoveAudio(obj);
-                var info = new AudioObjInfo(obj);
+				var info = new AudioObjInfo(obj);
 
-                if (info.OnHost == wasOnHost)
-                {
-                    return this.BadRequest($"Audio object was not moved to the host or device as expected. Now on {(info.OnHost ? "Host" : "OpenCL")}");
+				if (info.OnHost == wasOnHost)
+				{
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Move Operation Failed",
+						Detail = $"Audio object was not moved to the host or device as expected. Now on {(info.OnHost ? "Host" : "OpenCL")}",
+						Status = 400
+					});
 				}
 
-                return this.Ok(info);
+				return this.Ok(info);
 			}
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return this.StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+			catch (Exception ex)
+			{
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Audio Move Error",
+					Detail = ex.Message,
+					Status = 500
+				});
+			}
 		}
 
 		[HttpPost("moveImage/{guid}")]
 		[ProducesResponseType(typeof(ImageObjInfo), 200)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(500)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageObjInfo>> MoveImage(Guid guid)
 		{
-			var obj = this.imageCollection[guid];
-			if (obj == null || obj.Id == Guid.Empty)
-			{
-				return this.NotFound($"No image object found with Guid '{guid}'");
-			}
-
-			var wasOnHost = new ImageObjInfo(obj).OnHost;
-
 			try
 			{
-                if (!(await statusInfoTask).Initialized)
+				var obj = this.imageCollection[guid];
+				if (obj == null || obj.Id == Guid.Empty)
 				{
-                    return this.BadRequest("OpenCL service is not initialized. Please initialize it first.");
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Image Not Found",
+						Detail = $"No image object found with Guid '{guid}'",
+						Status = 404
+					});
+				}
+
+				var wasOnHost = new ImageObjInfo(obj).OnHost;
+
+				if (!(await this.statusInfoTask).Initialized)
+				{
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "OpenCL Not Initialized",
+						Detail = "OpenCL service is not initialized. Please initialize it first.",
+						Status = 400
+					});
 				}
 
 				var result = await this.openClService.MoveImage(obj);
@@ -465,15 +522,24 @@ namespace OOCL.Api.Controllers
 
 				if (info.OnHost == wasOnHost)
 				{
-					return this.BadRequest($"Image object was not moved to the host or device as expected. Now on {(info.OnHost ? "Host" : "OpenCL")}");
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Move Operation Failed",
+						Detail = $"Image object was not moved to the host or device as expected. Now on {(info.OnHost ? "Host" : "OpenCL")}",
+						Status = 400
+					});
 				}
 
 				return this.Ok(info);
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine(ex);
-				return this.StatusCode(500, $"Internal server error: {ex.Message}");
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Image Move Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 

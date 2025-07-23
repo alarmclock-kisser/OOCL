@@ -79,12 +79,13 @@ namespace OOCL.OpenCl
 		public IEnumerable<string> KernelFiles => this.Files.Keys;
 		public IEnumerable<string> KernelNames => this.Files.Values;
 
+		private bool tryAnalog = false;
 		public bool TryAnalog 
 		{
-			get => this.TryAnalog;
+			get => this.tryAnalog;
 			set
 			{
-				this.TryAnalog = value;
+				this.tryAnalog = value;
 				if (value)
 				{
 					this.Arguments = this.GetArguments(true);

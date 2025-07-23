@@ -42,6 +42,12 @@ namespace OOCL.Shared
 			this.DeviceId = service.Index;
 			this.DeviceName = service.GetDeviceInfo() ?? "N/A";
 			this.PlatformName = service.GetPlatformInfo() ?? "N/A";
+
+			//this.Status = service.Status;
+			// Geht NICHT, da Status in OpenClModelBase private ist + 
+			// SOLL auch NICHT nochmals gesetzt werden, da das schon der Basiskonstructor machen sollte,
+			// Da hier im ctor steht:  : base(obj)
+			// Ist das so ???
 		}
 	}
 }

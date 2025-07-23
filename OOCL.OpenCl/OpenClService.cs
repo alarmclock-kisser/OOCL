@@ -23,8 +23,8 @@ namespace OOCL.OpenCl
 			}
 		}
 		public string Type => "OpenCL-Service";
-		public bool Online => this.CTX.HasValue && this.DEV.HasValue && this.PLAT.HasValue && this.Index >= 0;
-		public string Status => this.Online && this.lastError == CLResultCode.Success ? "OK" : $"Error: '{this.LastErrorMessage}'";
+		public bool Online => this.CTX != null && this.DEV != null && this.PLAT != null && this.Index >= 0;
+		public string Status => this.GetStatus();
 		public string LastErrorMessage => this.lastError == CLResultCode.Success ? string.Empty : this.lastError.ToString();
 		public IEnumerable<string> ErrorMessages { get; private set; } = [];
 		// -----
@@ -78,6 +78,28 @@ namespace OOCL.OpenCl
 		// Options
 		public string PreferredDeviceName { get; set; } = string.Empty;
 
+
+		// Status
+		public string GetStatus()
+		{
+			string status = string.Empty;
+
+			if (this.DEV == null || this.PLAT == null || !this.CTX.HasValue)
+			{
+				status = "Not initialized";
+			}
+			else
+			{
+				status = $"Initialized: {this.GetDeviceInfo(this.DEV, DeviceInfo.Name)} ({this.GetPlatformInfo(this.PLAT, PlatformInfo.Name)}) [{this.Index}]";
+			}
+
+			if (this.lastError != CLResultCode.Success)
+			{
+				status += $" | Last Error: {this.lastError}";
+			}
+
+			return status;
+		}
 
 		// Dispose
 		public void Dispose(bool silent = false)
@@ -884,6 +906,7 @@ namespace OOCL.OpenCl
 				return;
 			}
 
+			this.Index = index;
 			this.DEV = devicesPlatforms.Keys.ElementAt(index);
 			this.PLAT = devicesPlatforms.Values.ElementAt(index);
 

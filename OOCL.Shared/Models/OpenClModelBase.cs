@@ -10,14 +10,14 @@ namespace OOCL.Shared.Models
 {
 	public class OpenClModelBase : IOpenClObj, IDisposable
 	{
-		public int Index { get; private set; } = -1;
-		public string Name { get; private set; } = string.Empty;
-		public string Type { get; private set; } = "OpenCL Object";
-		public bool Online { get; private set; } = false;
-		public string Status { get; private set; } = string.Empty;
-		public string Meta { get; private set; } = string.Empty;
-		public IEnumerable<string> ErrorMessages { get; private set; } = [];
-		private DateTime createdAt = DateTime.Now;
+		public int Index { get; set; }= -1;
+		public string Name { get; set; }= string.Empty;
+		public string Type { get; set; }= "OpenCL Object";
+		public bool Online { get; set; }= false;
+		public string Status { get; set; }= "FICK DEINE ABGEFACKTE DRECKS-MUTTER !!!";
+		public string Meta { get; set; }= string.Empty;
+		public IEnumerable<string> ErrorMessages { get; set; }= [];
+		protected DateTime createdAt = DateTime.Now;
 		public string Timestamp => this.createdAt.ToString("yyyy-MM-dd HH:mm:ss.fff");
 		public string TickAge => (DateTime.Now.Ticks - this.createdAt.Ticks).ToString();
 

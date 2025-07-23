@@ -21,264 +21,261 @@ namespace OOCL.Api.Controllers
 
 		[HttpGet("images")]
 		[ProducesResponseType(typeof(IEnumerable<ImageObjInfo>), 200)]
-		[ProducesResponseType(204)]
-		[ProducesResponseType(500)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<IEnumerable<ImageObjInfo>>> GetImages()
 		{
 			try
 			{
 				var infos = (await Task.Run(() =>
-					this.imageCollection.Images.AsParallel().Select(i => new ImageObjInfo(i))
-				)).AsEnumerable();
-
-				if (!infos.Any())
-				{
-					return this.NoContent();
-				}
-
-				return this.Ok(infos);
+					this.imageCollection.Images.AsParallel().Select(i => new ImageObjInfo(i)))).ToArray();
+				return this.Ok(infos.Length > 0 ? infos : Array.Empty<ImageObjInfo>());
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Error getting 'api/image/images': " + ex);
-				return this.StatusCode(500, ex);
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Get Images Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 
 		[HttpGet("images/{guid}/info")]
 		[ProducesResponseType(typeof(ImageObjInfo), 200)]
-		[ProducesResponseType(204)]
-		[ProducesResponseType(500)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageObjInfo>> GetImageInfo(Guid guid)
 		{
 			try
 			{
-				var info = await Task.Run(() =>
-				{
-					return this.imageCollection[guid];
-				});
-
-				if (info == null || info.Id == Guid.Empty)
-				{
-					return this.NoContent();
-				}
-
-				return this.Ok(info);
+				var info = await Task.Run(() => this.imageCollection[guid]);
+				return this.Ok(info != null ? new ImageObjInfo(info) : new ImageObjInfo());
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error calling 'api/image/images/{guid}/info': " + ex);
-				return this.StatusCode(500, ex);
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Image Info Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 
 		[HttpDelete("images/{guid}/remove")]
 		[ProducesResponseType(typeof(bool), 200)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(500)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<bool>> RemoveImage(Guid guid)
 		{
 			try
 			{
 				var obj = await Task.Run(() => this.imageCollection[guid]);
-
 				if (obj == null || obj.Id == Guid.Empty)
 				{
-					return this.NotFound($"No image found with Guid '{guid}'");
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Image Not Found",
+						Detail = $"No image found with Guid '{guid}'",
+						Status = 404
+					});
 				}
 
 				var result = await Task.Run(() => this.imageCollection.Remove(guid));
-
 				if (!result)
 				{
-					return this.BadRequest($"Couldn't remove image with Guid '{guid}'");
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Remove Failed",
+						Detail = $"Couldn't remove image with Guid '{guid}'",
+						Status = 400
+					});
 				}
 
-				result = this.imageCollection[guid] == null;
-
-				if (!result)
-				{
-					return this.BadRequest($"Couldn't remove image with Guid '{guid}'");
-				}
-
-				return this.Ok(result);
+				return this.Ok(this.imageCollection[guid] == null);
 			}
 			catch (Exception ex)
 			{
-				return this.StatusCode(500, $"Error calling api/image/{guid}/remove': {ex.Message}");
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Remove Image Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 
 		[HttpPost("images/empty/{width}/{height}")]
 		[ProducesResponseType(typeof(ImageObjInfo), 201)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(500)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageObjInfo>> AddEmptyImage(int width = 1920, int height = 1080)
 		{
 			try
 			{
 				var obj = await Task.Run(() => this.imageCollection.PopEmpty(new(width, height), true));
-
 				if (obj == null || obj.Id == Guid.Empty)
 				{
-					return this.BadRequest($"Failed to create empty image with size {width}x{height}");
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Creation Failed",
+						Detail = $"Failed to create empty image with size {width}x{height}",
+						Status = 400
+					});
 				}
 
 				var info = new ImageObjInfo(obj);
-
-				var result = this.imageCollection[info.Id] != null;
-
-				if (!result)
+				if (this.imageCollection[info.Id] == null)
 				{
-					return this.NotFound("Couldn't get image in collection after creating");
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Image Missing",
+						Detail = "Couldn't get image in collection after creating",
+						Status = 404
+					});
 				}
 
-				return this.Created($"api/audios/{info.Id}/info", info);
+				return this.Created($"api/images/{info.Id}/info", info);
 			}
 			catch (Exception ex)
 			{
-				return this.StatusCode(500, $"Error calling 'images/empty/{width}/{height}': {ex.Message}");
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Create Image Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 
 		[HttpPost("images/upload")]
-        [RequestSizeLimit(256_000_000)]
-        [ProducesResponseType(typeof(ImageObjInfo), 201)]
-		[ProducesResponseType(204)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(500)]
+		[RequestSizeLimit(256_000_000)]
+		[ProducesResponseType(typeof(ImageObjInfo), 201)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageObjInfo>> UploadImage(IFormFile file, bool copyGuid = true)
 		{
 			if (file.Length == 0)
 			{
-				return this.NoContent();
+				return this.BadRequest(new ProblemDetails
+				{
+					Title = "Empty File",
+					Detail = "Uploaded file is empty",
+					Status = 400
+				});
 			}
 
 			Stopwatch sw = Stopwatch.StartNew();
-
-			// Temp dir for storing uploaded files
 			var tempDir = Path.Combine(Path.GetTempPath(), "image_uploads");
 			Directory.CreateDirectory(tempDir);
-
-			// Store original file name and path
-			var originalFileName = Path.GetFileName(file.FileName);
-			var tempPath = Path.Combine(tempDir, originalFileName);
+			var tempPath = Path.Combine(tempDir, Path.GetFileName(file.FileName));
 
 			try
 			{
-				// Save file with original name
 				await using (var stream = System.IO.File.Create(tempPath))
 				{
 					await file.CopyToAsync(stream);
 				}
 
-				// Load the image into the collection
 				var imgObj = await this.imageCollection.LoadImage(tempPath);
+				if (imgObj == null || imgObj.Id == Guid.Empty)
+				{
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Upload Failed",
+						Detail = "Failed to load image from uploaded file",
+						Status = 400
+					});
+				}
 
-				// Keep the original file name in the ImgObj
-				if (imgObj != null && imgObj.Id != Guid.Empty && imgObj.Img != null)
-				{
-					imgObj.Name = imgObj.Name ?? Path.GetFileNameWithoutExtension(originalFileName);
-					imgObj.Filepath = originalFileName;
-					this.imageCollection.Add(imgObj);
-				}
-				else
-				{
-					return this.BadRequest("Failed to load image from uploaded file.");
-				}
+				imgObj.Name ??= Path.GetFileNameWithoutExtension(file.FileName);
+				imgObj.Filepath = file.FileName;
+				this.imageCollection.Add(imgObj);
 
 				var info = this.imageCollection[imgObj.Id];
-
-				if (info == null || info.Id == Guid.Empty)
+				if (info == null)
 				{
 					imgObj.Dispose();
-					return this.NotFound("Failed to retrieve image information after upload.");
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Upload Info Missing",
+						Detail = "Failed to retrieve image information after upload",
+						Status = 404
+					});
 				}
 
-				await this.clipboard.SetTextAsync(info.Id.ToString());
+				if (copyGuid) await this.clipboard.SetTextAsync(info.Id.ToString());
 				return this.Created($"api/images/{info.Id}/info", info);
 			}
 			catch (Exception ex)
 			{
-				string msg = $"Error uploading image: {ex.Message} ({ex.InnerException?.Message})";
-				Console.WriteLine(msg);
-
-				return this.BadRequest(msg);
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Upload Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 			finally
 			{
-				try
-				{
-					if (System.IO.File.Exists(tempPath))
-					{
-						System.IO.File.Delete(tempPath);
-					}
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"Error deleting temporary file: {ex.Message}");
-				}
-				finally
-				{
-					sw.Stop();
-					await Task.Yield();
-				}
+				try { if (System.IO.File.Exists(tempPath)) System.IO.File.Delete(tempPath); }
+				catch (Exception ex) { Console.WriteLine($"Error deleting temp file: {ex.Message}"); }
+				sw.Stop();
 			}
 		}
 
 		[HttpGet("images/{guid}/download/{format}")]
-		[ProducesResponseType(200)]
-		[ProducesResponseType(204)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(400)]
-		[ProducesResponseType(500)]
+		[ProducesResponseType(typeof(FileResult), 200)]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 400)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<IActionResult> DownloadImage(Guid guid, string format = "bmp")
 		{
-			string? filePath = null;
-			byte[] fileBytes = [];
-
 			try
 			{
 				var obj = this.imageCollection[guid];
-
 				if (obj == null)
 				{
-					return this.NotFound($"Image with GUID {guid} not found.");
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Image Not Found",
+						Detail = $"Image with GUID {guid} not found",
+						Status = 404
+					});
 				}
 
-				var info = new ImageObjInfo(obj);
-
-				if (obj.Img == null)
-				{
-					return this.NoContent();
-				}
-
-				// Download image as file
-				filePath = await obj.Export("", format);
+				var filePath = await obj.Export("", format);
 				if (string.IsNullOrEmpty(filePath))
 				{
-					return this.BadRequest("Failed to export image to file.");
+					return this.BadRequest(new ProblemDetails
+					{
+						Title = "Export Failed",
+						Detail = "Failed to export image to file",
+						Status = 400
+					});
 				}
 
-				fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-
+				var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
 				return this.File(fileBytes, "application/octet-stream", Path.GetFileName(filePath));
 			}
 			catch (Exception ex)
 			{
-				return this.StatusCode(500, $"Error downloading image: {ex.Message}");
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Download Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 
 		[HttpGet("images/{guid}/image64/{format}")]
 		[ProducesResponseType(typeof(ImageData), 200)]
-		[ProducesResponseType(204)]
-		[ProducesResponseType(404)]
-		[ProducesResponseType(500)]
-		[Produces("application/json")]
+		[ProducesResponseType(typeof(ProblemDetails), 404)]
+		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageData>> GetBase64(Guid guid, string format = "bmp")
 		{
 			try
@@ -286,29 +283,31 @@ namespace OOCL.Api.Controllers
 				var obj = this.imageCollection[guid];
 				if (obj == null || obj.Id == Guid.Empty)
 				{
-					return this.NotFound($"No image found with Guid '{guid}'");
+					return this.NotFound(new ProblemDetails
+					{
+						Title = "Image Not Found",
+						Detail = $"No image found with Guid '{guid}'",
+						Status = 404
+					});
 				}
 
 				var code = await obj.AsBase64Image(format);
-
 				if (string.IsNullOrEmpty(code))
 				{
-					return this.NoContent();
+					return this.Ok(new ImageData ());
 				}
 
-				//var data = new ImageData(code, obj.Width, obj.Height);
 				var data = new ImageData(obj);
-				if (data.Base64Image == string.Empty)
-				{
-					return this.NoContent();
-				}
-
 				return this.Ok(data);
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine("Error getting base64 string: " + ex.Message);
-				return this.StatusCode(500, ex);
+				return this.StatusCode(500, new ProblemDetails
+				{
+					Title = "Base64 Error",
+					Detail = ex.Message,
+					Status = 500
+				});
 			}
 		}
 

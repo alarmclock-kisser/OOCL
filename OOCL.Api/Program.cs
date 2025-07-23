@@ -24,7 +24,7 @@ namespace OOCL.Api
 			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ OOCL.Api \\ appsettings.json ~ ~ ~ ~ ~ User options: ~ ~ ~ ~ ~ ");
 			Console.WriteLine();
 			Console.WriteLine($"~appsettings~: {(useSwagger ? "Not u" : "U")}sing swagger UI with{(useSwagger ? "" : "out")} endpoints. ['UseSwagger'] = '{(useSwagger ? "true" : "false")}'");
-			Console.WriteLine($"~appsettings~: Max upload size set to {(maxUploadSize / 1_000_000)} MB. ['MaxUploadMb'] = '{builder.Configuration.GetValue<int>("MaxUploadMb")}'");
+			Console.WriteLine($"~appsettings~: Max upload size set to {(maxUploadSize / 1_000_000)} MB. ['MaxUploadMb'] = '{maxUploadSize / 1_000_000}'");
 			Console.WriteLine($"~appsettings~: Memory saving {(saveMemory ? "en" : "dis")}abled. ['SaveMemory'] = '{(saveMemory ? "true" : "false")}'");
 			if (saveMemory)
 			{
@@ -40,7 +40,7 @@ namespace OOCL.Api
 			{
 				options.AddPolicy("BlazorCors", policy =>
 				{
-					policy.WithOrigins("https://localhost:23300")
+					policy.WithOrigins("https://localhost:7172")
 						  .AllowAnyHeader()
 						  .AllowAnyMethod();
 				});
@@ -72,11 +72,11 @@ namespace OOCL.Api
 						Version = "v1",
 						Title = "APICL",
 						Description = "API + WebApp using OpenCL for media manipulation",
-						TermsOfService = new Uri("https://localhost:7116/terms"),
+						TermsOfService = new Uri("https://localhost:7172/terms"),
 						Contact = new OpenApiContact { Name = "Developer", Email = "marcel.king91299@gmail.com" }
 					});
 
-					c.AddServer(new OpenApiServer { Url = "https://localhost:5115" });
+					c.AddServer(new OpenApiServer { Url = "https://localhost:7171" });
 					c.DocInclusionPredicate((_, api) => !string.IsNullOrWhiteSpace(api.GroupName));
 					c.TagActionsBy(api => [api.GroupName ?? "Default"]);
 				});

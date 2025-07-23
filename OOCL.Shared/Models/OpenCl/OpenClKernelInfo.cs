@@ -7,13 +7,14 @@ namespace OOCL.Shared
 	public class OpenClKernelInfo : OpenClModelBase
 	{
 		public string Filepath = string.Empty;
-		public int ArgumentsCount { get; private set; } = 0;
-		public IEnumerable<string> ArgumentNames { get; private set; } = [];
-		public IEnumerable<string> ArgumentType { get; private set; } = [];
-		public string InputPointerType { get; private set; } = "void*";
-		public string OutputPointerType { get; private set; } = string.Empty;
+		public int ArgumentsCount { get; set; } = 0;
+		public IEnumerable<string> ArgumentNames { get; set; } = [];
+		public IEnumerable<string> ArgumentType { get; set; } = [];
+		public string InputPointerType { get; set; } = "void*";
+		public string OutputPointerType { get; set; } = string.Empty;
 
-        public string MediaType { get; private set; } = "DIV";
+        public string MediaType { get; set; } = "DIV";
+		public string FunctionName { get; set; } = string.Empty;
 
 
 
@@ -50,7 +51,11 @@ namespace OOCL.Shared
 			this.InputPointerType = compiler.PointerInputType;
 			this.OutputPointerType = compiler.PointerOutputType;
 
+			this.MediaType = this.Filepath.Contains("Image") ? "IMG" :
+				this.Filepath.Contains("Audio") ? "AUD" :
+				this.Filepath.Contains("Video") ? "VID" : "DIV";
 
+			this.FunctionName = compiler.GetKernelName(this.Filepath) ?? string.Empty;
 		}
 	}
 }

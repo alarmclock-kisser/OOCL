@@ -11,4 +11,8 @@
     <ProjectReference Include="..\OOCL.OpenCl\OOCL.OpenCl.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Ressources\" />
+  </ItemGroup>
+
 </Project>

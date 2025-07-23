@@ -10,23 +10,23 @@ namespace OOCL.Shared
 {
 	public class MediaModelBase : IMediaObj, IDisposable
 	{
-		public Guid Id { get; private set; } = Guid.Empty;
+		public Guid Id { get; set; } = Guid.Empty;
 
-		public string Name { get; private set; } = string.Empty;
+		public string Name { get; set; } = string.Empty;
 
-		public string Filepath { get; private set; } = string.Empty;
+		public string Filepath { get; set; } = string.Empty;
 
-		public string Meta { get; private set; } = string.Empty;
+		public string Meta { get; set; } = string.Empty;
 
-		public bool OnHost { get; private set; } = true;
+		public bool OnHost { get; set; } = true;
 
-		public float SizeMb { get; private set; } = 0.0f;
+		public float SizeMb { get; set; } = 0.0f;
 
-		public string PointerHex { get; private set; } = string.Empty;
+		public string PointerHex { get; set; } = string.Empty;
 
-		public string DataType { get; private set; } = "void";
+		public string DataType { get; set; } = "void";
 
-		public string DataStructure { get; private set; } = "[]";
+		public string DataStructure { get; set; } = "[]";
 
 		public MediaModelBase()
 		{
