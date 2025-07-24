@@ -5,12 +5,6 @@ namespace OOCL.Core
 {
     public class ImageCollection : IDisposable
     {
-		// Options
-        public string ImportPath { get; set; } = string.Empty;
-        public string ExportPath { get; set; } = string.Empty;
-        public bool SaveMemory { get; set; } = false;
-
-
 		private readonly ConcurrentDictionary<Guid, ImageObj> images = [];
         private readonly object lockObj = new();
 
@@ -47,7 +41,26 @@ namespace OOCL.Core
             }
         }
 
-        public bool Add(ImageObj imgObj)
+		// Options
+		public string ImportPath { get; set; } = string.Empty;
+		public string ExportPath { get; set; } = string.Empty;
+		public bool SaveMemory { get; set; } = false;
+        public int DefaultWidth { get; set; } = 720;
+        public int DefaultHeight { get; set; } = 480;
+
+		// Ctor with options
+		public ImageCollection(bool saveMemory = false, int defaultWidth = 720, int defaultHeight = 480)
+        {
+            this.DefaultWidth = Math.Max(defaultWidth, 360); // Min is 360px width
+			this.DefaultHeight = Math.Max(defaultHeight, 240); // Min is 240px height
+			this.SaveMemory = saveMemory;
+            if (this.SaveMemory)
+            {
+                Console.WriteLine("ImageCollection: Memory saving enabled. All images will be disposed on add.");
+            }
+		}
+
+		public bool Add(ImageObj imgObj)
         {
 			if (this.SaveMemory)
             {

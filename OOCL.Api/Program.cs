@@ -15,10 +15,14 @@ namespace OOCL.Api
             var builder = WebApplication.CreateBuilder(args);
 
 			// Get appsettings
-			bool useSwagger = builder.Configuration.GetValue<bool>("UseSwagger");
-			int maxUploadSize = builder.Configuration.GetValue<int>("MaxUploadMb") * 1_000_000;
-			bool saveMemory = builder.Configuration.GetValue<bool>("SaveMemory");
-			int spareWorkers = builder.Configuration.GetValue<int>("SpareWorkers");
+			bool useSwagger = builder.Configuration.GetValue<bool>("UseSwagger", false);
+			int maxUploadSize = builder.Configuration.GetValue<int>("MaxUploadMb", 64) * 1_000_000;
+			bool saveMemory = builder.Configuration.GetValue<bool>("SaveMemory", false);
+			int spareWorkers = builder.Configuration.GetValue<int>("SpareWorkers", 0);
+			int defaultVolume = builder.Configuration.GetValue<int>("DefaultVolume", 50);
+			int waveformFps = builder.Configuration.GetValue<int>("WaveformFps", 30);
+			int defaultWidth = builder.Configuration.GetValue<int>("DefaultImageWidth", 720);
+			int defaultHeight = builder.Configuration.GetValue<int>("DefaultImageHeight", 480);
 
 			// Log retrieved settings on console
 			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ OOCL.Api \\ appsettings.json ~ ~ ~ ~ ~ User options: ~ ~ ~ ~ ~ ");
@@ -30,6 +34,9 @@ namespace OOCL.Api
 			{
 				Console.WriteLine("~ ~ ~ ~ ~ ~ ~: (Warning: This will wipe all media objects except for the most recent one!)");
 			}
+			Console.WriteLine($"~appsettings~: Default playback volume set to {defaultVolume}%. ['DefaultVolume'] = '{defaultVolume}'");
+			Console.WriteLine($"~appsettings~: Waveform FPS set to {waveformFps}. ['WaveformFps'] = '{waveformFps}'");
+			Console.WriteLine($"~appsettings~: Default image resolution set to {defaultWidth}x{defaultHeight} px. ['DefaultImageWidth'] = '{defaultWidth}', ['DefaultImageHeight'] = '{defaultHeight}'");
 			Console.WriteLine($"~appsettings~: Spare workers set to {spareWorkers}. ['SpareWorkers'] = '{spareWorkers}'" +
 				$" (using {(CommonStatics.ActiveWorkers)} of max. {CommonStatics.MaxAvailableWorkers})");
 			Console.WriteLine();
@@ -48,8 +55,23 @@ namespace OOCL.Api
 
 			// Add services to the container.
 			builder.Services.AddSingleton<OOCL.OpenCl.OpenClService>();
-			builder.Services.AddSingleton<OOCL.Core.AudioCollection>();
-            builder.Services.AddSingleton<OOCL.Core.ImageCollection>();
+			// Here please add the AudioCollection as Singleton with the SaveMemory option (Set fielt to saveMemory)
+			// Correct the syntax for adding AudioCollection as a singleton service
+			builder.Services.AddSingleton<OOCL.Core.AudioCollection>(provider =>
+				new OOCL.Core.AudioCollection
+				{
+					SaveMemory = saveMemory,
+					DefaultPlaybackVolume = defaultVolume,
+					AnimationDelay = waveformFps
+				});
+
+			builder.Services.AddSingleton<OOCL.Core.ImageCollection>(provider =>
+			new OOCL.Core.ImageCollection
+				{
+					SaveMemory = saveMemory,
+					DefaultWidth = 720,
+					DefaultHeight = 480
+				});
 
 			builder.Services.InjectClipboard();
 

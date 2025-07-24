@@ -581,7 +581,7 @@ namespace OOCL.OpenCl
 				{
 					if (logSuccess)
 					{
-						this.Log("this.LastResultCode allocating output buffer", "", 2);
+						this.Log("Error allocating output buffer", "", 2);
 					}
 
 					return pointer;
@@ -603,7 +603,7 @@ namespace OOCL.OpenCl
 				if (error2 != CLResultCode.Success)
 				{
 					this.lastError = error2;
-					this.Log("this.LastResultCode setting kernel argument " + i + ": " + error2.ToString(), arguments[i].ToString() ?? "");
+					this.Log("Error setting kernel argument " + i + ": " + error2.ToString(), arguments[i].ToString() ?? "");
 					return pointer;
 				}
 			}
@@ -614,7 +614,7 @@ namespace OOCL.OpenCl
 			// Log arguments
 			if (logSuccess)
 			{
-				this.Log("Kernel arguments set: " + string.Join(", ", argNames.Select((a, i) => a + ": " + arguments[i].ToString())), "'" + kernelName + "'", 2);
+				this.Log("Kernel arguments set: " + string.Join(", ", argNames.Select((a, i) => a + ": " + arguments[i].ToString())), "'" + kernelName + version + "'", 2);
 			}
 
 			// Exec
@@ -839,12 +839,7 @@ namespace OOCL.OpenCl
 			// Get kernel arguments
 			List<string> argNames = this.KernelCompiler.ArgumentNames.ToList();
 			List<Type> argTypes = this.KernelCompiler.ArgumentTypes.Select(t => System.Type.GetType(t) ?? typeof(object)).ToList();
-			Dictionary<string, Type> definitions = argNames.Select((name, index) => new KeyValuePair<string, Type>(name, index < argTypes.Count ? argTypes[index] : typeof(object))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-			if (definitions == null || definitions.Count == 0)
-			{
-				this.Log("No argument definitions found", "", 2);
-				return arguments.ToList();
-			};
+			Dictionary<string, Type> definitions = this.KernelCompiler.Arguments; // argNames.Select((name, index) => new KeyValuePair<string, Type>(name, index < argTypes.Count ? argTypes[index] : typeof(object))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
 			if (definitions.Count == 0)
 			{
@@ -852,7 +847,7 @@ namespace OOCL.OpenCl
 				this.KernelCompiler.TryAnalog = true;
 				argNames = this.KernelCompiler.ArgumentNames.ToList();
 				argTypes = this.KernelCompiler.ArgumentTypes.Select(t => System.Type.GetType(t) ?? typeof(object)).ToList();
-				definitions = argNames.Select((name, index) => new KeyValuePair<string, Type>(name, index < argTypes.Count ? argTypes[index] : typeof(object))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+				definitions = this.KernelCompiler.Arguments; // argNames.Select((name, index) => new KeyValuePair<string, Type>(name, index < argTypes.Count ? argTypes[index] : typeof(object))).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 				if (definitions == null || definitions.Count == 0)
 				{
 					this.Log("No argument definitions found", "", 2);

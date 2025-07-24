@@ -311,7 +311,8 @@ namespace OOCL.Api.Controllers
 
 				Stopwatch sw = Stopwatch.StartNew();
 				var result = await Task.Run(() =>
-					this.openClService.ExecuteImageKernel(obj, kernel, version, variableArgs));
+					this.openClService.ExecuteImageKernel(obj, kernel, version, variableArgs, true));
+				
 				sw.Stop();
 
 				var info = await Task.Run(() => new ImageObjInfo(obj));

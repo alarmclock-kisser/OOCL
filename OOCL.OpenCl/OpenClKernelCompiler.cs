@@ -99,7 +99,7 @@ namespace OOCL.OpenCl
 			}
 		}
 		private Dictionary<string, Type> GetArguments(bool analog = false) => analog ? this.GetKernelArgumentsAnalog() : this.GetKernelArguments();
-		private Dictionary<string, Type> Arguments
+		internal Dictionary<string, Type> Arguments
 		{
 			get => this.GetArguments(this.TryAnalog);
 			set

@@ -99,7 +99,7 @@
 
     private Guid selectedImageId = Guid.Empty;
     private IEnumerable<ImageObjInfo> imageInfos = [];
-
+    private string downloadFormat = "bmp";
 
 
     private string base64Format = "png";
@@ -213,7 +213,7 @@
             try
             {
                 // Direkt die URL zum API-Endpunkt aufrufen
-                string downloadUrl = $"{ApiConfig.Url}/api/image/download/{guidToDownload.Value}";
+                string downloadUrl = $"{ApiConfig.Url}/api/image/images/{guidToDownload.Value}/download/{downloadFormat}";
 
                 // Rufe die JavaScript-Funktion auf, um den Download zu starten
                 await JSRuntime.InvokeVoidAsync("downloadFileFromUrl", downloadUrl, $"{fileName}.bmp");

@@ -44,6 +44,18 @@ namespace OOCL.Core
 		public string ImportPath { get; set; } = string.Empty;
 		public string ExportPath { get; set; } = string.Empty;
 
+		// Ctor with options
+		public AudioCollection(bool saveMemory = false, int defaultPlaybackVolume = 66, int fps = 30)
+		{
+			this.SaveMemory = saveMemory;
+			this.DefaultPlaybackVolume = defaultPlaybackVolume;
+			this.AnimationDelay = 1000 / fps;
+			if (this.SaveMemory)
+			{
+				this.LogMessage?.Invoke(this, "Memory saving enabled. All tracks will be disposed on new track addition.");
+			}
+		}
+
 
 		// --- Public Methods ---
 		public async Task<AudioObj> AddTrack(string filePath)
