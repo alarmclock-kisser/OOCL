@@ -1,4 +1,5 @@
-﻿using OpenTK.Compute.OpenCL;
+﻿using log4net;
+using OpenTK.Compute.OpenCL;
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
@@ -100,6 +101,10 @@ namespace OOCL.OpenCl
 
 		public string UsagePercentageString => this.UsagePercentage.ToString("F5");
 
+		// Log4net path
+		public bool EnableLogging { get; set; } = true;
+		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
+		private readonly ILog logger = LogManager.GetLogger(typeof(OpenClMemoryRegister));
 
 
 		// ----- ----- ----- ATTRIBUTES ----- ----- ----- \\
@@ -144,6 +149,13 @@ namespace OOCL.OpenCl
 
 			// Invoke optionally
 			Console.WriteLine(msg);
+
+			if (!this.EnableLogging)
+			{
+				return; // Logging is disabled
+			}
+
+			this.logger.Info(msg);
 		}
 
 		// Dispose

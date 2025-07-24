@@ -1,4 +1,5 @@
-﻿using OpenTK.Compute.OpenCL;
+﻿using log4net;
+using OpenTK.Compute.OpenCL;
 using OpenTK.Mathematics;
 using System.Text;
 
@@ -117,7 +118,10 @@ namespace OOCL.OpenCl
 		public IEnumerable<string> ArgumentNames => this.Arguments.Keys;
 		public IEnumerable<string> ArgumentTypes => this.Arguments.Values.Select(t => t.Name);
 
-
+		// Log4net path
+		public bool EnableLogging { get; set; } = true;
+		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
+		private readonly ILog logger = LogManager.GetLogger(typeof(OpenClKernelCompiler));
 
 
 		// ----- ----- ----- CONSTRUCTORS ----- ----- ----- \\
@@ -157,6 +161,13 @@ namespace OOCL.OpenCl
 
 			// Invoke optionally
 			Console.WriteLine(msg);
+
+			if (!this.EnableLogging)
+			{
+				return; // Logging is disabled
+			}
+
+			this.logger.Info(msg);
 		}
 
 		// Dispose

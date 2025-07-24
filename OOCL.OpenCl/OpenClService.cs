@@ -1,4 +1,5 @@
-﻿using OOCL.Core;
+﻿using log4net;
+using OOCL.Core;
 using OpenTK.Compute.OpenCL;
 using System.Diagnostics;
 using System.Globalization;
@@ -59,6 +60,33 @@ namespace OOCL.OpenCl
 
 		// Event for UI updates
 		private event Action? OnChange;
+
+		// Log4net path
+		private bool enableLogging = true;
+		public bool EnableLogging
+		{
+			get => this.enableLogging;
+			set
+			{
+				this.enableLogging = value;
+
+				// Set every objects EnableLogging property
+				if (this.MemoryRegister != null)
+				{
+					this.MemoryRegister.EnableLogging = value;
+				}
+				if (this.KernelCompiler != null)
+				{
+					this.KernelCompiler.EnableLogging = value;
+				}
+				if (this.KernelExecutioner != null)
+				{
+					this.KernelExecutioner.EnableLogging = value;
+				}
+			}
+		}
+		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
+		private readonly ILog logger = LogManager.GetLogger(typeof(OpenClService));
 
 
 		// Current information
@@ -124,9 +152,9 @@ namespace OOCL.OpenCl
 			this.KernelCompiler = null; // Clear reference
 
 			// Log
-			if (!silent)
+			if (this.EnableLogging)
 			{
-				Console.WriteLine("Disposed OpenCL context and resources.");
+				this.Log("Disposed OpenCL context and resources.");
 			}
 
             this.OnChange?.Invoke();
@@ -141,8 +169,15 @@ namespace OOCL.OpenCl
 				msg += " (" + inner + ")";
 			}
 
-			// Invoke optionally
+			// CW + log4net
 			Console.WriteLine(msg);
+
+			if (!this.EnableLogging)
+			{
+				return; // Logging is disabled
+			}
+
+			this.logger.Info(msg);
 		}
 
 
@@ -158,12 +193,12 @@ namespace OOCL.OpenCl
 				this.lastError = CL.GetPlatformIds(out platforms);
 				if (this.lastError != CLResultCode.Success)
 				{
-					Console.WriteLine($"Error retrieving OpenCL platforms: {this.lastError}");
+					this.Log($"Error retrieving OpenCL platforms: {this.lastError}");
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error retrieving OpenCL platforms: {ex.Message}");
+				this.Log($"Error retrieving OpenCL platforms: {ex.Message}");
 			}
 
 			return platforms;
@@ -182,7 +217,7 @@ namespace OOCL.OpenCl
 					this.lastError = CL.GetDeviceIds(platform, DeviceType.All, out platformDevices);
 					if (this.lastError != CLResultCode.Success)
 					{
-						Console.WriteLine($"Error retrieving devices for platform {this.GetPlatformInfo<string>(platform)}: {this.lastError}");
+						this.Log($"Error retrieving devices for platform {this.GetPlatformInfo<string>(platform)}: {this.lastError}");
 						continue;
 					}
 					foreach (CLDevice device in platformDevices)
@@ -192,7 +227,7 @@ namespace OOCL.OpenCl
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Error retrieving devices for platform {this.GetPlatformInfo<string>(platform)}: {ex.Message}");
+					this.Log($"Error retrieving devices for platform {this.GetPlatformInfo<string>(platform)}: {ex.Message}");
 				}
 			}
 			return devices;
@@ -202,7 +237,7 @@ namespace OOCL.OpenCl
 
 
 		// Device & Platform info
-		public CLDevice? GetDevice(int index = -1, bool silent = true)
+		public CLDevice? GetDevice(int index = -1)
 		{
 			// Get all OpenCL devices & platforms
 			Dictionary<CLDevice, CLPlatform> devicesPlatforms = this.Devices;
@@ -210,10 +245,7 @@ namespace OOCL.OpenCl
 			// Check if index is valid
 			if (index < 0 || index >= devicesPlatforms.Count)
 			{
-				if (!silent)
-				{
-					Console.WriteLine($"Invalid device index: {index}. Valid range is 0 to {devicesPlatforms.Count - 1}.");
-				}
+				this.Log($"Invalid device index: {index}. Valid range is 0 to {devicesPlatforms.Count - 1}.");
 
 				return null;
 			}
@@ -221,7 +253,7 @@ namespace OOCL.OpenCl
 			// Get device by index
 			return devicesPlatforms.Keys.ElementAt(index);
 		}
-		public CLPlatform? GetPlatform(int index = -1, bool silent = true)
+		public CLPlatform? GetPlatform(int index = -1)
 		{
 			// Get all OpenCL devices & platforms
 			Dictionary<CLDevice, CLPlatform> devicesPlatforms = this.Devices;
@@ -229,11 +261,8 @@ namespace OOCL.OpenCl
 			// Check if index is valid
 			if (index < 0 || index >= devicesPlatforms.Count)
 			{
-				if (!silent)
-				{
-					Console.WriteLine($"Invalid platform index: {index}. Valid range is 0 to {devicesPlatforms.Count - 1}.");
-				}
-			
+				this.Log($"Invalid platform index: {index}. Valid range is 0 to {devicesPlatforms.Count - 1}.");
+
 				return null;
 			}
 			
@@ -247,7 +276,7 @@ namespace OOCL.OpenCl
 			device ??= this.DEV;
 			if (device == null)
 			{
-				Console.WriteLine("No OpenCL device specified or currently initialized.");
+				this.Log("No OpenCL device specified or currently initialized.");
 				return "Unknown";
 			}
 
@@ -266,78 +295,66 @@ namespace OOCL.OpenCl
 			return typeName;
 		}
 
-		public string? GetDeviceInfo(CLDevice? device = null, DeviceInfo info = DeviceInfo.Name, bool silent = true)
+		public string? GetDeviceInfo(CLDevice? device = null, DeviceInfo info = DeviceInfo.Name)
 		{
 			// Verify device
 			device ??= this.DEV;
 			if (device == null)
 			{
-				if (!silent)
-				{
-					Console.WriteLine("No OpenCL device specified or currently initialized.");
-				}
+				this.Log("No OpenCL device specified or currently initialized.");
+
 				return null;
 			}
 
 			this.lastError = CL.GetDeviceInfo(device.Value, info, out byte[] infoCode);
 			if (this.lastError != CLResultCode.Success || infoCode == null || infoCode.LongLength == 0)
 			{
-				if (!silent)
-				{
-					Console.WriteLine($"Failed to get device info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
-				}
+				this.Log($"Failed to get device info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
+
 				return null;
 			}
 
 			return Encoding.UTF8.GetString(infoCode).Trim('\0');
 		}
 
-		public string? GetPlatformInfo(CLPlatform? platform = null, PlatformInfo info = PlatformInfo.Name, bool silent = true)
+		public string? GetPlatformInfo(CLPlatform? platform = null, PlatformInfo info = PlatformInfo.Name)
 		{
 			// Verify platform
 			platform ??= this.PLAT;
 			if (platform == null)
 			{
-				if (!silent)
-				{
-					Console.WriteLine("No OpenCL platform specified or currently initialized.");
-				}
+				this.Log("No OpenCL platform specified or currently initialized.");
+
 				return null;
 			}
 
 			this.lastError = CL.GetPlatformInfo(platform.Value, info, out byte[] infoCode);
 			if (this.lastError != CLResultCode.Success || infoCode == null || infoCode.LongLength == 0)
 			{
-				if (!silent)
-				{
-					Console.WriteLine($"Failed to get platform info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
-				}
+				this.Log($"Failed to get platform info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
+
 				return null;
 			}
 			
 			return Encoding.UTF8.GetString(infoCode).Trim('\0');
 		}
 
-		public T? GetDeviceInfo<T>(CLDevice? device = null, DeviceInfo info = DeviceInfo.Name, bool silent = true)
+		public T? GetDeviceInfo<T>(CLDevice? device = null, DeviceInfo info = DeviceInfo.Name)
 		{
 			// Verify device
 			device ??= this.DEV;
 			if (device == null)
 			{
-				if (!silent)
-				{
-					Console.WriteLine("No OpenCL device specified or currently initialized.");
-				}
+				this.Log("No OpenCL device specified or currently initialized.");
+
 				return default;
 			}
 
 			this.lastError = CL.GetDeviceInfo(device.Value, info, out byte[] infoCode);
 			if (this.lastError != CLResultCode.Success || infoCode == null || infoCode.LongLength == 0) // infoCode == null hinzugefügt
 			{
-				if (!silent)
-				{
-					Console.WriteLine($"Failed to get device info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
-				}
+				this.Log($"Failed to get device info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
+
 				return default;
 			}
 
@@ -364,26 +381,22 @@ namespace OOCL.OpenCl
 					}
 					catch (TargetInvocationException tie)
 					{
-						if (!silent)
-						{
-							Console.WriteLine($"Error calling FromBytes on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
-						}
+						this.Log($"Error calling FromBytes on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
+
 					}
 					catch (Exception ex)
 					{
-						if (!silent)
-						{
-							Console.WriteLine($"Error during FromBytes invocation for '{targetType.Name}': {ex.Message}");
-						}
+						this.Log($"Error during FromBytes invocation for '{targetType.Name}': {ex.Message}");
+
 					}
 				}
-				else if (!silent && fromBytesMethod == null)
+				else if (fromBytesMethod == null)
 				{
-					Console.WriteLine($"No static public 'FromBytes(byte[])' method found on type '{targetType.Name}'.");
+					this.Log($"No static public 'FromBytes(byte[])' method found on type '{targetType.Name}'.");
 				}
-				else if (!silent && fromBytesMethod != null)
+				else if (fromBytesMethod != null)
 				{
-					Console.WriteLine($"Warning: FromBytes method found for '{targetType.Name}' but its return type '{fromBytesMethod.ReturnType.Name}' is not assignable to '{targetType.Name}'.");
+					this.Log($"Warning: FromBytes method found for '{targetType.Name}' but its return type '{fromBytesMethod.ReturnType.Name}' is not assignable to '{targetType.Name}'.");
 				}
 
 				if (result == null) // Wenn FromBytes nicht erfolgreich war oder nicht existiert
@@ -407,29 +420,20 @@ namespace OOCL.OpenCl
 							{
 								result = parameters[1]; // Das out-Parameter-Ergebnis
 							}
-							else if (!silent)
-							{
-								Console.WriteLine($"TryParse method on '{targetType.Name}' returned false.");
-							}
+							this.Log($"TryParse method on '{targetType.Name}' returned false.");
 						}
 						catch (TargetInvocationException tie)
 						{
-							if (!silent)
-							{
-								Console.WriteLine($"Error calling TryParse (byte[]) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
-							}
+							this.Log($"Error calling TryParse (byte[]) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 						}
 						catch (Exception ex)
 						{
-							if (!silent)
-							{
-								Console.WriteLine($"Error during TryParse (byte[]) invocation for '{targetType.Name}': {ex.Message}");
-							}
+							this.Log($"Error during TryParse (byte[]) invocation for '{targetType.Name}': {ex.Message}");
 						}
 					}
-					else if (!silent && tryParseMethod == null)
+					else if (tryParseMethod == null)
 					{
-						Console.WriteLine($"No static public 'TryParse(byte[], out T)' method found on type '{targetType.Name}'.");
+						this.Log($"No static public 'TryParse(byte[], out T)' method found on type '{targetType.Name}'.");
 					}
 
 					if (result == null) // Wenn FromBytes und TryParse(byte[]) nicht erfolgreich waren
@@ -445,10 +449,8 @@ namespace OOCL.OpenCl
 
 						if (string.IsNullOrEmpty(strValue))
 						{
-							if (!silent)
-							{
-								Console.WriteLine("Converted byte array to empty or null string; cannot parse.");
-							}
+							this.Log("Converted byte array to empty or null string; cannot parse.");
+
 							return default; // Keine Daten zum Parsen
 						}
 
@@ -474,24 +476,15 @@ namespace OOCL.OpenCl
 								{
 									result = parameters[1];
 								}
-								else if (!silent)
-								{
-									Console.WriteLine($"TryParse (string) method on '{targetType.Name}' returned false for string: '{strValue}'.");
-								}
+								this.Log($"TryParse (string) method on '{targetType.Name}' returned false for string: '{strValue}'.");
 							}
 							catch (TargetInvocationException tie)
 							{
-								if (!silent)
-								{
-									Console.WriteLine($"Error calling TryParse (string) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
-								}
+								this.Log($"Error calling TryParse (string) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 							}
 							catch (Exception ex)
 							{
-								if (!silent)
-								{
-									Console.WriteLine($"Error during TryParse (string) invocation for '{targetType.Name}': {ex.Message}");
-								}
+								this.Log($"Error during TryParse (string) invocation for '{targetType.Name}': {ex.Message}");
 							}
 						}
 						else if (parseMethod != null && parseMethod.GetParameters().Length == 1 && parseMethod.GetParameters()[0].ParameterType == typeof(string) && parseMethod.ReturnType.IsAssignableTo(targetType))
@@ -502,49 +495,15 @@ namespace OOCL.OpenCl
 							}
 							catch (TargetInvocationException tie)
 							{
-								if (!silent)
-								{
-									Console.WriteLine($"Error calling Parse on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
-								}
+								this.Log($"Error calling Parse on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 							}
 							catch (Exception ex)
 							{
-								if (!silent)
-								{
-									Console.WriteLine($"Error during Parse invocation for '{targetType.Name}': {ex.Message}");
-								}
+								this.Log($"Error during Parse invocation for '{targetType.Name}': {ex.Message}");
 							}
 						}
-						else if (!silent)
-						{
-							Console.WriteLine($"No suitable static public 'Parse(string)' or 'TryParse(string, out T)' method found on type '{targetType.Name}'.");
 
-							// Letzter Fallback: Convert.ChangeType für primitive Typen, die direkt von string konvertierbar sind
-							try
-							{
-								// Spezielle Behandlung für string und byte[] direkt (um Reflection zu vermeiden)
-								if (targetType == typeof(string))
-								{
-									result = strValue;
-								}
-								else if (targetType == typeof(byte[]))
-								{
-									// Dies sollte bereits oben behandelt worden sein, aber zur Sicherheit
-									result = infoCode;
-								}
-								else if (strValue != null)
-								{
-									result = Convert.ChangeType(strValue, targetType, System.Globalization.CultureInfo.InvariantCulture);
-								}
-							}
-							catch (Exception ex)
-							{
-								if (!silent)
-								{
-									Console.WriteLine($"Error during Convert.ChangeType fallback for '{targetType.Name}': {ex.Message}");
-								}
-							}
-						}
+						this.Log($"No suitable static public 'Parse(string)' or 'TryParse(string, out T)' method found on type '{targetType.Name}'.");
 					}
 				}
 
@@ -552,33 +511,29 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				if (!silent)
-				{
-					Console.WriteLine($"Unhandled error in GetDeviceInfo<T> for '{info}' to type '{typeof(T).Name}': {ex.Message}");
-				}
+				this.Log($"Unhandled error in GetDeviceInfo<T> for '{info}' to type '{typeof(T).Name}': {ex.Message}");
+
 				return default;
 			}
 		}
 
-		public T? GetPlatformInfo<T>(CLPlatform? platform = null, PlatformInfo info = PlatformInfo.Name, bool silent = true)
+		public T? GetPlatformInfo<T>(CLPlatform? platform = null, PlatformInfo info = PlatformInfo.Name)
 		{
 			// Verify platform
 			platform ??= this.PLAT;
 			if (platform == null)
 			{
-				if (!silent)
-				{
-					Console.WriteLine("No OpenCL platform specified or currently initialized.");
-				}
+				this.Log("No OpenCL platform specified or currently initialized.");
+
 				return default;
 			}
 
 			this.lastError = CL.GetPlatformInfo(platform.Value, info, out byte[] infoCode);
 			if (this.lastError != CLResultCode.Success || infoCode == null || infoCode.LongLength == 0)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine($"Failed to get platform info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
+					this.Log($"Failed to get platform info for '{info}': {this.lastError}. {(infoCode == null || infoCode.LongLength == 0 ? "No data returned." : "")}");
 				}
 				return default;
 			}
@@ -621,26 +576,26 @@ namespace OOCL.OpenCl
 					}
 					catch (TargetInvocationException tie)
 					{
-						if (!silent)
+						if (this.EnableLogging)
 						{
-							Console.WriteLine($"Error calling FromBytes on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
+							this.Log($"Error calling FromBytes on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 						}
 					}
 					catch (Exception ex)
 					{
-						if (!silent)
+						if (this.EnableLogging)
 						{
-							Console.WriteLine($"Error during FromBytes invocation for '{targetType.Name}': {ex.Message}");
+							this.Log($"Error during FromBytes invocation for '{targetType.Name}': {ex.Message}");
 						}
 					}
 				}
-				else if (!silent && fromBytesMethod == null)
+				else if (this.EnableLogging && fromBytesMethod == null)
 				{
-					Console.WriteLine($"No static public 'FromBytes(byte[])' method found on type '{targetType.Name}'.");
+					this.Log($"No static public 'FromBytes(byte[])' method found on type '{targetType.Name}'.");
 				}
-				else if (!silent && fromBytesMethod != null)
+				else if (this.EnableLogging && fromBytesMethod != null)
 				{
-					Console.WriteLine($"Warning: FromBytes method found for '{targetType.Name}' but its return type '{fromBytesMethod.ReturnType.Name}' is not assignable to '{targetType.Name}'.");
+					this.Log($"Warning: FromBytes method found for '{targetType.Name}' but its return type '{fromBytesMethod.ReturnType.Name}' is not assignable to '{targetType.Name}'.");
 				}
 
 				if (result == null) // Wenn FromBytes nicht erfolgreich war oder nicht existiert
@@ -664,29 +619,29 @@ namespace OOCL.OpenCl
 							{
 								result = parameters[1]; // Das out-Parameter-Ergebnis
 							}
-							else if (!silent)
+							else if (this.EnableLogging)
 							{
-								Console.WriteLine($"TryParse method on '{targetType.Name}' returned false.");
+								this.Log($"TryParse method on '{targetType.Name}' returned false.");
 							}
 						}
 						catch (TargetInvocationException tie)
 						{
-							if (!silent)
+							if (this.EnableLogging)
 							{
-								Console.WriteLine($"Error calling TryParse (byte[]) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
+								this.Log($"Error calling TryParse (byte[]) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 							}
 						}
 						catch (Exception ex)
 						{
-							if (!silent)
+							if (this.EnableLogging)
 							{
-								Console.WriteLine($"Error during TryParse (byte[]) invocation for '{targetType.Name}': {ex.Message}");
+								this.Log($"Error during TryParse (byte[]) invocation for '{targetType.Name}': {ex.Message}");
 							}
 						}
 					}
-					else if (!silent && tryParseMethod == null)
+					else if (this.EnableLogging && tryParseMethod == null)
 					{
-						Console.WriteLine($"No static public 'TryParse(byte[], out T)' method found on type '{targetType.Name}'.");
+						this.Log($"No static public 'TryParse(byte[], out T)' method found on type '{targetType.Name}'.");
 					}
 
 					if (result == null) // Wenn FromBytes und TryParse(byte[]) nicht erfolgreich waren
@@ -702,9 +657,9 @@ namespace OOCL.OpenCl
 
 						if (string.IsNullOrEmpty(strValue))
 						{
-							if (!silent)
+							if (this.EnableLogging)
 							{
-								Console.WriteLine("Converted byte array to empty or null string; cannot parse for platform info.");
+								this.Log("Converted byte array to empty or null string; cannot parse for platform info.");
 							}
 							return default; // Keine Daten zum Parsen
 						}
@@ -731,23 +686,23 @@ namespace OOCL.OpenCl
 								{
 									result = parameters[1];
 								}
-								else if (!silent)
+								else if (this.EnableLogging)
 								{
-									Console.WriteLine($"TryParse (string) method on '{targetType.Name}' returned false for string: '{strValue}'.");
+									this.Log($"TryParse (string) method on '{targetType.Name}' returned false for string: '{strValue}'.");
 								}
 							}
 							catch (TargetInvocationException tie)
 							{
-								if (!silent)
+								if (this.EnableLogging)
 								{
-									Console.WriteLine($"Error calling TryParse (string) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
+									this.Log($"Error calling TryParse (string) on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 								}
 							}
 							catch (Exception ex)
 							{
-								if (!silent)
+								if (this.EnableLogging)
 								{
-									Console.WriteLine($"Error during TryParse (string) invocation for '{targetType.Name}': {ex.Message}");
+									this.Log($"Error during TryParse (string) invocation for '{targetType.Name}': {ex.Message}");
 								}
 							}
 						}
@@ -759,22 +714,22 @@ namespace OOCL.OpenCl
 							}
 							catch (TargetInvocationException tie)
 							{
-								if (!silent)
+								if (this.EnableLogging)
 								{
-									Console.WriteLine($"Error calling Parse on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
+									this.Log($"Error calling Parse on '{targetType.Name}': {tie.InnerException?.Message ?? tie.Message}");
 								}
 							}
 							catch (Exception ex)
 							{
-								if (!silent)
+								if (this.EnableLogging)
 								{
-									Console.WriteLine($"Error during Parse invocation for '{targetType.Name}': {ex.Message}");
+									this.Log($"Error during Parse invocation for '{targetType.Name}': {ex.Message}");
 								}
 							}
 						}
-						else if (!silent)
+						else if (this.EnableLogging)
 						{
-							Console.WriteLine($"No suitable static public 'Parse(string)' or 'TryParse(string, out T)' method found on type '{targetType.Name}'.");
+							this.Log($"No suitable static public 'Parse(string)' or 'TryParse(string, out T)' method found on type '{targetType.Name}'.");
 
 							try
 							{
@@ -785,9 +740,9 @@ namespace OOCL.OpenCl
 							}
 							catch (Exception ex)
 							{
-								if (!silent)
+								if (this.EnableLogging)
 								{
-									Console.WriteLine($"Error during Convert.ChangeType fallback for '{targetType.Name}': {ex.Message}");
+									this.Log($"Error during Convert.ChangeType fallback for '{targetType.Name}': {ex.Message}");
 								}
 							}
 						}
@@ -798,9 +753,9 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine($"Unhandled error in GetPlatformInfo<T> for '{info}' to type '{typeof(T).Name}': {ex.Message}");
+					this.Log($"Unhandled error in GetPlatformInfo<T> for '{info}' to type '{typeof(T).Name}': {ex.Message}");
 				}
 				return default;
 			}
@@ -818,10 +773,10 @@ namespace OOCL.OpenCl
 			foreach (CLDevice device in devicesPlatforms.Keys)
 			{
 				// Get device name
-				string deviceName = this.GetDeviceInfo(device, DeviceInfo.Name, true) ?? "N/A";
+				string deviceName = this.GetDeviceInfo(device, DeviceInfo.Name) ?? "N/A";
 
 				// Get platform name
-				string platformName = this.GetPlatformInfo(devicesPlatforms[device], PlatformInfo.Name, true) ?? "N/A";
+				string platformName = this.GetPlatformInfo(devicesPlatforms[device], PlatformInfo.Name) ?? "N/A";
 
 				// Add to dictionary
 				names.Add(deviceName, platformName);
@@ -844,7 +799,7 @@ namespace OOCL.OpenCl
 
 			if (this.DEV == null || this.PLAT == null)
 			{
-				Console.WriteLine("No OpenCL device or platform initialized.");
+				this.Log("No OpenCL device or platform initialized.");
 				return [];
 			}
 
@@ -873,7 +828,7 @@ namespace OOCL.OpenCl
 			
 			if (this.PLAT == null)
 			{
-				Console.WriteLine("No OpenCL platform initialized.");
+				this.Log("No OpenCL platform initialized.");
 				return [];
 			}
 			
@@ -897,9 +852,9 @@ namespace OOCL.OpenCl
 
 			if (index < 0 || index >= devicesPlatforms.Count)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Invalid index for OpenCL device selection");
+					this.Log("Invalid index for OpenCL device selection");
 				}
 
                 this.OnChange?.Invoke();
@@ -914,9 +869,9 @@ namespace OOCL.OpenCl
 			if (error != CLResultCode.Success || this.CTX == null)
 			{
 				this.lastError = error;
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine($"Failed to create OpenCL context: {this.lastError}");
+					this.Log($"Failed to create OpenCL context: {this.lastError}");
 				}
 
                 this.OnChange?.Invoke();
@@ -929,9 +884,9 @@ namespace OOCL.OpenCl
 
 			this.Index = index;
 
-			if (!silent)
+			if (this.EnableLogging)
 			{
-				Console.WriteLine($"Initialized OpenCL context for device {this.GetDeviceInfo(this.DEV, DeviceInfo.Name) ?? "N/A"} on platform {this.GetPlatformInfo(this.PLAT, PlatformInfo.Name) ?? "N/A"}");
+				this.Log($"Initialized OpenCL context for device {this.GetDeviceInfo(this.DEV, DeviceInfo.Name) ?? "N/A"} on platform {this.GetPlatformInfo(this.PLAT, PlatformInfo.Name) ?? "N/A"}");
 			}
 
             this.OnChange?.Invoke();
@@ -954,9 +909,9 @@ namespace OOCL.OpenCl
 
 			if (index == -1)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine($"Device '{deviceName}' not found or not initialized. Available devices: {string.Join(", ", devicesNames)}");
+					this.Log($"Device '{deviceName}' not found or not initialized. Available devices: {string.Join(", ", devicesNames)}");
 				}
 				return;
 			}
@@ -978,7 +933,7 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error retrieving current OpenCL info: {ex.Message}");
+				this.Log($"Error retrieving current OpenCL info: {ex.Message}");
 			}
 			finally
 			{
@@ -988,13 +943,13 @@ namespace OOCL.OpenCl
 			return info;
 		}
 
-		public async Task<List<ClMem>> GetMemoryObjectsAsync(bool silent = true)
+		public async Task<List<ClMem>> GetMemoryObjectsAsync()
 		{
 			if (this.MemoryRegister == null)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Memory register is not initialized.");
+					this.Log("Memory register is not initialized.");
 				}
 				return [];
 			}
@@ -1004,18 +959,18 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error retrieving memory objects: {ex.Message}");
+				this.Log($"Error retrieving memory objects: {ex.Message}");
 				return [];
 			}
 		}
 
-		public async Task<Dictionary<string, IntPtr>> GetMemoryStatsAsync(bool silent = true)
+		public async Task<Dictionary<string, IntPtr>> GetMemoryStatsAsync()
 		{
 			if (this.MemoryRegister == null)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Memory register is not initialized.");
+					this.Log("Memory register is not initialized.");
 				}
 				return [];
 			}
@@ -1028,7 +983,7 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error retrieving memory stats: {ex.Message}");
+				this.Log($"Error retrieving memory stats: {ex.Message}");
 				return [];
 			}
 			finally
@@ -1037,13 +992,13 @@ namespace OOCL.OpenCl
 			}
 		}
 
-		public async Task<float> GetMemoryUsagePercentageAsync(bool silent = true)
+		public async Task<float> GetMemoryUsagePercentageAsync()
 		{
 			if (this.MemoryRegister == null)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Memory register is not initialized.");
+					this.Log("Memory register is not initialized.");
 				}
 				return 0f;
 			}
@@ -1057,16 +1012,16 @@ namespace OOCL.OpenCl
 				}
 				else
 				{
-					if (!silent)
+					if (this.EnableLogging)
 					{
-						Console.WriteLine("Memory stats are not available or invalid.");
+						this.Log("Memory stats are not available or invalid.");
 					}
 					return 0.0f;
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error calculating memory usage percentage: {ex.Message}");
+				this.Log($"Error calculating memory usage percentage: {ex.Message}");
 				return 0f;
 			}
 			finally
@@ -1075,28 +1030,28 @@ namespace OOCL.OpenCl
 			}
 		}
 
-		public async Task<long> GetDeviceScore(CLDevice? device = null, bool silent = true)
+		public async Task<long> GetDeviceScore(CLDevice? device = null)
 			{
 			// Verify device
 			device ??= this.DEV;
 			if (device == null)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("No OpenCL device specified or currently initialized.");
+					this.Log("No OpenCL device specified or currently initialized.");
 				}
 				return 0;
 			}
 			try
 			{
-				int computeUnits = this.GetDeviceInfo<int>(device, DeviceInfo.MaximumComputeUnits, true);
-				long clockFrequency = this.GetDeviceInfo<long>(device, DeviceInfo.MaximumClockFrequency, true);
+				int computeUnits = this.GetDeviceInfo<int>(device, DeviceInfo.MaximumComputeUnits);
+				long clockFrequency = this.GetDeviceInfo<long>(device, DeviceInfo.MaximumClockFrequency);
 
 				return computeUnits * clockFrequency;
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error calculating device score: {ex.Message}");
+				this.Log($"Error calculating device score: {ex.Message}");
 				return -1;
 			}
 			finally
@@ -1105,14 +1060,14 @@ namespace OOCL.OpenCl
 			}
 		}
 
-		public async Task<int?> GetStrongestDeviceIndexAsync(DeviceType deviceType = DeviceType.All, bool silent = true)
+		public async Task<int?> GetStrongestDeviceIndexAsync(DeviceType deviceType = DeviceType.All)
 		{
 			var devices = this.Devices.Keys.ToList();
 			if (devices.Count == 0)
 			{
-				if (!silent)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("No OpenCL devices found.");
+					this.Log("No OpenCL devices found.");
 				}
 				return null;
 			}
@@ -1120,7 +1075,7 @@ namespace OOCL.OpenCl
 			try
 			{
 				Dictionary<CLDevice, DeviceType> deviceTypes = devices.ToList()
-					.ToDictionary(d => d, d => this.GetDeviceInfo<DeviceType>(d, DeviceInfo.Type, true));
+					.ToDictionary(d => d, d => this.GetDeviceInfo<DeviceType>(d, DeviceInfo.Type));
 
 				// Filter devices by type
 				List<CLDevice> filteredDevices;
@@ -1137,9 +1092,9 @@ namespace OOCL.OpenCl
 
 				if (scores.Count == 0)
 				{
-					if (!silent)
+					if (this.EnableLogging)
 					{
-						Console.WriteLine($"No devices found for type {deviceType}.");
+						this.Log($"No devices found for type {deviceType}.");
 					}
 					return null;
 				}
@@ -1151,7 +1106,7 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error finding strongest device: {ex.Message}");
+				this.Log($"Error finding strongest device: {ex.Message}");
 				return null;
 			}
 			finally
@@ -1166,7 +1121,7 @@ namespace OOCL.OpenCl
 		{
 			if (this.MemoryRegister == null)
 			{
-				Console.WriteLine("Memory register is not initialized.");
+				this.Log("Memory register is not initialized.");
 				return IntPtr.Zero;
 			}
 			try
@@ -1179,14 +1134,14 @@ namespace OOCL.OpenCl
 					var mem = this.MemoryRegister.PushData<byte>(pixels);
 					if (mem == null)
 					{
-						Console.WriteLine("Failed to push image data to OpenCL memory.");
+						this.Log("Failed to push image data to OpenCL memory.");
 						return IntPtr.Zero;
 					}
 
 					long memIndexHandle = mem[0].Handle;
 					if (memIndexHandle == 0)
 					{
-						Console.WriteLine("Failed to parse memory index handle.");
+						this.Log("Failed to parse memory index handle.");
 						return IntPtr.Zero;
 					}
 
@@ -1202,7 +1157,7 @@ namespace OOCL.OpenCl
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error moving image to OpenCL memory: {ex.Message}");
+				this.Log($"Error moving image to OpenCL memory: {ex.Message}");
 				return IntPtr.Zero;
 			}
 			finally
@@ -1217,7 +1172,7 @@ namespace OOCL.OpenCl
 		{
 			if (this.MemoryRegister == null)
 			{
-				Console.WriteLine("Memory register is not initialized.");
+				this.Log("Memory register is not initialized.");
 				return IntPtr.Zero;
 			}
 			try
@@ -1230,21 +1185,21 @@ namespace OOCL.OpenCl
 					chunks = (await obj.GetChunks(chunkSize, overlap, false)).AsParallel().ToList();
 					if (chunks.Count <= 0)
 					{
-						Console.WriteLine("Failed to get audio chunks from AudioObj.");
+						this.Log("Failed to get audio chunks from AudioObj.");
 						return IntPtr.Zero;
 					}
 
 					var mem = this.MemoryRegister.PushChunks<float>(chunks);
 					if (mem == null)
 					{
-						Console.WriteLine("Failed to push audio chunks to OpenCL memory.");
+						this.Log("Failed to push audio chunks to OpenCL memory.");
 						return IntPtr.Zero;
 					}
 
 					long memIndexHandle = mem[0].Handle;
 					if (memIndexHandle == 0)
 					{
-						Console.WriteLine("Failed to parse memory index handle.");
+						this.Log("Failed to parse memory index handle.");
 						return IntPtr.Zero;
 					}
 
@@ -1258,12 +1213,12 @@ namespace OOCL.OpenCl
 				}
 				else
 				{
-					Console.WriteLine("Error: AudioObj is neither on Host nor on Device.");
+					this.Log("Error: AudioObj is neither on Host nor on Device.");
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error moving audio to OpenCL memory: {ex.Message}");
+				this.Log($"Error moving audio to OpenCL memory: {ex.Message}");
 				return IntPtr.Zero;
 			}
 			finally
@@ -1279,7 +1234,7 @@ namespace OOCL.OpenCl
 			// Check executioner
 			if (this.KernelExecutioner == null)
 			{
-				Console.WriteLine("Kernel executioner not initialized", "Cannot execute audio kernel");
+				this.Log("Kernel executioner not initialized (Cannot execute audio kernel)");
 				return IntPtr.Zero;
 			}
 
@@ -1295,18 +1250,18 @@ namespace OOCL.OpenCl
 			}
 			if (!obj.OnDevice)
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Audio object is not on device", "Pointer=" + obj.Pointer.ToString("X16"), 1);
+					this.Log("Audio object is not on device", "Pointer=" + obj.Pointer.ToString("X16"), 1);
 				}
 				return IntPtr.Zero;
 			}
 
 			// Execute kernel on device
-			obj.Pointer = this.KernelExecutioner.ExecuteAudioKernel((nint)obj.Pointer, out double factor, obj.Length, kernelName, version, chunkSize, overlap, obj.Samplerate, obj.Bitdepth, obj.Channels, optionalArguments, log);
+			obj.Pointer = this.KernelExecutioner.ExecuteAudioKernel((nint)obj.Pointer, out double factor, obj.Length, kernelName, version, chunkSize, overlap, obj.Samplerate, obj.Bitdepth, obj.Channels, optionalArguments);
 			if (obj.Pointer == IntPtr.Zero && log)
 			{
-				Console.WriteLine("Failed to execute audio kernel", "Pointer=" + obj.Pointer.ToString("X16"), 1);
+				this.Log("Failed to execute audio kernel", "Pointer=" + obj.Pointer.ToString("X16"), 1);
 			}
 
 			// Reload kernel
@@ -1318,7 +1273,7 @@ namespace OOCL.OpenCl
 				// IMPORTANT: Set obj Factor
 				obj.StretchFactor = factor;
 				obj.Bpm = (float) (obj.Bpm / factor);
-				Console.WriteLine("Factor for audio kernel: " + factor, "Pointer=" + obj.Pointer.ToString("X16") + " BPM: " + obj.Bpm, 1);
+				this.Log("Factor for audio kernel: " + factor, "Pointer=" + obj.Pointer.ToString("X16") + " BPM: " + obj.Bpm, 1);
 			}
 
 			// Move back optionally
@@ -1327,10 +1282,10 @@ namespace OOCL.OpenCl
 				await this.MoveAudio(obj, chunkSize, overlap);
 			}
 
-			if (log)
+			if (this.EnableLogging)
 			{
 				sw.Stop();
-				Console.WriteLine("Executed audio kernel", "Pointer=" + obj.Pointer.ToString("X16") + ", Time: " + sw.ElapsedMilliseconds + "ms", 1);
+				this.Log("Executed audio kernel", "Pointer=" + obj.Pointer.ToString("X16") + ", Time: " + sw.ElapsedMilliseconds + "ms", 1);
 			}
 
 			return (nint)obj.Pointer;
@@ -1342,16 +1297,16 @@ namespace OOCL.OpenCl
 			bool moved = false;
 			if (obj.OnHost)
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Image was on host, pushing ...", obj.Width + " x " + obj.Height, 2);
+					this.Log("Image was on host, pushing ...", obj.Width + " x " + obj.Height, 2);
 				}
 
 				// Get pixel bytes
 				byte[] pixels = (await obj.GetBytes(false)).AsParallel().ToArray();
 				if (pixels.LongLength == 0)
 				{
-					Console.WriteLine("Couldn't get byte[] from image object", "Aborting", 1);
+					this.Log("Couldn't get byte[] from image object", "Aborting", 1);
 					return IntPtr.Zero;
 				}
 
@@ -1359,9 +1314,9 @@ namespace OOCL.OpenCl
 				var mem = this.MemoryRegister?.PushData<byte>(pixels);
 				if (mem == null)
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
-						Console.WriteLine("Couldn't push pixels to device", pixels.LongLength.ToString("N0"), 1);
+						this.Log("Couldn't push pixels to device", pixels.LongLength.ToString("N0"), 1);
 					}
 
 					return IntPtr.Zero;
@@ -1370,9 +1325,9 @@ namespace OOCL.OpenCl
 				long memIndexHandle = mem[0].Handle;
 				if (memIndexHandle == 0)
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
-						Console.WriteLine("Couldn't parse memory index handle", "Aborting", 1);
+						this.Log("Couldn't parse memory index handle", "Aborting", 1);
 					}
 					return IntPtr.Zero;
 				}
@@ -1380,9 +1335,9 @@ namespace OOCL.OpenCl
 				obj.Pointer = memIndexHandle;
 				if (obj.OnHost || obj.Pointer == IntPtr.Zero)
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
-						Console.WriteLine("Couldn't get pointer after pushing pixels to device", pixels.LongLength.ToString("N0"), 1);
+						this.Log("Couldn't get pointer after pushing pixels to device", pixels.LongLength.ToString("N0"), 1);
 					}
 					return IntPtr.Zero;
 				}
@@ -1404,9 +1359,9 @@ namespace OOCL.OpenCl
 			});
 			if (outputPointer == IntPtr.Zero)
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Couldn't get output pointer after kernel execution", "Aborting", 1);
+					this.Log("Couldn't get output pointer after kernel execution", "Aborting", 1);
 				}
 
 				return outputPointer;
@@ -1422,9 +1377,9 @@ namespace OOCL.OpenCl
 				byte[] pixels = this.MemoryRegister?.PullData<byte>((nint)obj.Pointer) ?? [];
 				if (pixels == null || pixels.LongLength == 0)
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
-						Console.WriteLine("Couldn't pull pixels (byte[]) from device", "Aborting", 1);
+						this.Log("Couldn't pull pixels (byte[]) from device", "Aborting", 1);
 					}
 					return IntPtr.Zero;
 				}
@@ -1436,7 +1391,7 @@ namespace OOCL.OpenCl
 			return outputPointer;
 		}
 
-		public async Task<IntPtr> PerformFFT(AudioObj obj, string version = "01", int chunkSize = 0, float overlap = 0.0f, bool log = false)
+		public async Task<IntPtr> PerformFFT(AudioObj obj, string version = "01", int chunkSize = 0, float overlap = 0.0f)
 		{
 			// Optionally move audio to device
 			if (obj.OnHost)
@@ -1445,26 +1400,26 @@ namespace OOCL.OpenCl
 			}
 			if (!obj.OnDevice)
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Couldn't move audio object to device", "Pointer=" + obj.Pointer.ToString("X16"), 1);
+					this.Log("Couldn't move audio object to device", "Pointer=" + obj.Pointer.ToString("X16"), 1);
 				}
 
 				return IntPtr.Zero;
 			}
 
 			// Perform FFT on device
-			obj.Pointer = this.KernelExecutioner?.ExecuteFFT((nint)obj.Pointer, version, obj.Form.FirstOrDefault(), chunkSize, overlap, true, log) ?? obj.Pointer;
+			obj.Pointer = this.KernelExecutioner?.ExecuteFFT((nint)obj.Pointer, version, obj.Form.FirstOrDefault(), chunkSize, overlap, true) ?? obj.Pointer;
 
-			if (obj.Pointer == IntPtr.Zero && log)
+			if (obj.Pointer == IntPtr.Zero)
 			{
-				Console.WriteLine("Failed to perform FFT", "Pointer=" + obj.Pointer.ToString("X16"), 1);
+				this.Log("Failed to perform FFT", "Pointer=" + obj.Pointer.ToString("X16"), 1);
 			}
 			else
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
-					Console.WriteLine("Performed FFT", "Pointer=" + obj.Pointer.ToString("X16"), 1);
+					this.Log("Performed FFT", "Pointer=" + obj.Pointer.ToString("X16"), 1);
 				}
 				obj.Form = obj.Form.StartsWith("f") ? "c" : "f";
 			}
@@ -1476,7 +1431,7 @@ namespace OOCL.OpenCl
 		{
 			if (this.KernelExecutioner == null)
 			{
-				Console.WriteLine("Kernel executioner is not initialized.");
+				this.Log("Kernel executioner is not initialized.");
 				return obj;
 			}
 
@@ -1491,7 +1446,7 @@ namespace OOCL.OpenCl
 					IntPtr pointer = await this.MoveAudio(obj, chunkSize, overlap);
 					if (pointer == IntPtr.Zero)
 					{
-						Console.WriteLine("Failed to move audio to device memory.");
+						this.Log("Failed to move audio to device memory.");
 						return obj;
 					}
 					moved = true;
@@ -1519,7 +1474,7 @@ namespace OOCL.OpenCl
 				var ptr  = await this.ExecuteAudioKernel(obj, kernelName, "", chunkSize, overlap, optionalArgs, true);
 				if (ptr == IntPtr.Zero)
 				{
-					Console.WriteLine("Failed to execute time stretch kernel.", "Pointer=" + ptr.ToString("X16"));
+					this.Log("Failed to execute time stretch kernel.", "Pointer=" + ptr.ToString("X16"));
 					return obj;
 				}
 
@@ -1529,14 +1484,14 @@ namespace OOCL.OpenCl
 					IntPtr resultPointer = await this.MoveAudio(obj, chunkSize, overlap);
 					if (resultPointer != IntPtr.Zero)
 					{
-						Console.WriteLine("Failed to move audio back to host memory.");
+						this.Log("Failed to move audio back to host memory.");
 						return obj;
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Console.WriteLine($"Error during time stretch: {ex.Message}");
+				this.Log($"Error during time stretch: {ex.Message}");
 			}
 			finally
 			{
