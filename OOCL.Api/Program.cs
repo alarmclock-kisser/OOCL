@@ -5,6 +5,7 @@ using TextCopy;
 using Microsoft.AspNetCore.Mvc;
 using OOCL.Core;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace OOCL.Api
@@ -17,6 +18,7 @@ namespace OOCL.Api
 
 			// Get appsettings
 			bool useSwagger = builder.Configuration.GetValue<bool>("UseSwagger", false);
+			bool clearPreviousLogs = builder.Configuration.GetValue<bool>("ClearPreviousLogs", false);
 			int maxUploadSize = builder.Configuration.GetValue<int>("MaxUploadMb", 64) * 1_000_000;
 			bool saveMemory = builder.Configuration.GetValue<bool>("SaveMemory", false);
 			int spareWorkers = builder.Configuration.GetValue<int>("SpareWorkers", 0);
@@ -59,6 +61,7 @@ namespace OOCL.Api
 			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ OOCL.Api \\ appsettings.json ~ ~ ~ ~ ~ User options: ~ ~ ~ ~ ~ ");
 			Console.WriteLine();
 			Console.WriteLine($"~appsettings~: {(useSwagger ? "Not u" : "U")}sing swagger UI with{(useSwagger ? "" : "out")} endpoints. ['UseSwagger'] = '{(useSwagger ? "true" : "false")}'");
+			Console.WriteLine($"~appsettings~: Clear previous log files set to {(clearPreviousLogs ? "true" : "false")}. ['ClearPreviousLogs'] = '{(clearPreviousLogs ? "true" : "false")}'");
 			Console.WriteLine($"~appsettings~: Max upload size set to {(maxUploadSize / 1_000_000)} MB. ['MaxUploadMb'] = '{maxUploadSize / 1_000_000}'");
 			Console.WriteLine($"~appsettings~: Memory saving {(saveMemory ? "en" : "dis")}abled. ['SaveMemory'] = '{(saveMemory ? "true" : "false")}'");
 			if (saveMemory)
@@ -99,6 +102,11 @@ namespace OOCL.Api
 			});
 
 			// Add services to the container.
+			// Replace the incorrect line with a valid service registration
+			builder.Services.AddSingleton<OOCL.Shared.RollingFileLogger>(provider =>
+			{
+				return new OOCL.Shared.RollingFileLogger(clearPreviousLogs);
+			});
 			builder.Services.AddSingleton<OOCL.OpenCl.OpenClService>();
 			builder.Services.AddSingleton<OOCL.Core.AudioCollection>(provider =>
 				new OOCL.Core.AudioCollection
