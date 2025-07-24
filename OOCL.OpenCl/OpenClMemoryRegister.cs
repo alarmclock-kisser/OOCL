@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using OOCL.Core;
 using OpenTK.Compute.OpenCL;
 using System;
 using System.Collections.Concurrent;
@@ -104,7 +104,7 @@ namespace OOCL.OpenCl
 		// Log4net path
 		public bool EnableLogging { get; set; } = true;
 		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-		private readonly ILog logger = LogManager.GetLogger(typeof(OpenClMemoryRegister));
+		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Register");
 
 
 		// ----- ----- ----- ATTRIBUTES ----- ----- ----- \\
@@ -121,6 +121,10 @@ namespace OOCL.OpenCl
 		public OpenClMemoryRegister(string repopath, CLContext context, CLDevice device, CLPlatform platform)
 		{
 			this.Repopath = repopath;
+
+			// Set logger
+			
+
 			this.CTX = context;
 			this.DEV = device;
 			this.PLAT = platform;
@@ -132,6 +136,9 @@ namespace OOCL.OpenCl
 				this.lastError = error;
 				this.Log("Failed to create CL-CommandQueue.");
 			}
+
+			// Test + success Log()
+			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
 		}
 
 
@@ -155,7 +162,7 @@ namespace OOCL.OpenCl
 				return; // Logging is disabled
 			}
 
-			this.logger.Info(msg);
+			this.logger.Log(msg);
 		}
 
 		// Dispose

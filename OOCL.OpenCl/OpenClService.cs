@@ -1,5 +1,4 @@
-﻿using log4net;
-using OOCL.Core;
+﻿using OOCL.Core;
 using OpenTK.Compute.OpenCL;
 using System.Diagnostics;
 using System.Globalization;
@@ -86,7 +85,10 @@ namespace OOCL.OpenCl
 			}
 		}
 		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-		private readonly ILog logger = LogManager.GetLogger(typeof(OpenClService));
+
+		// Log4net logger with config ('log4net.config' at root of project)
+		
+
 
 
 		// Current information
@@ -106,6 +108,8 @@ namespace OOCL.OpenCl
 		// Options
 		public string PreferredDeviceName { get; set; } = string.Empty;
 
+		// Logger
+		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Service");
 
 		// Status
 		public string GetStatus()
@@ -177,7 +181,7 @@ namespace OOCL.OpenCl
 				return; // Logging is disabled
 			}
 
-			this.logger.Info(msg);
+			this.logger.Log(msg);
 		}
 
 

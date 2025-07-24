@@ -1,4 +1,4 @@
-﻿using log4net;
+﻿using OOCL.Core;
 using OpenTK.Compute.OpenCL;
 using OpenTK.Mathematics;
 using System.Diagnostics;
@@ -47,19 +47,23 @@ namespace OOCL.OpenCl
 		// Log4net path
 		public bool EnableLogging { get; set; } = true;
 		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-		private readonly ILog logger = LogManager.GetLogger(typeof(OpenClService));
+		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Executioner");
 
 
 		// ----- ----- -----  CONSTRUCTOR ----- ----- ----- \\
 		public OpenClKernelExecutioner(string repopath, OpenClMemoryRegister memR, CLContext context, CLDevice device, CLPlatform platform, CLCommandQueue queue, OpenClKernelCompiler compiler)
 		{
 			this.Repopath = repopath;
+
 			this.MemoryRegister = memR;
 			this.CTX = context;
 			this.DEV = device;
 			this.PLAT = platform;
 			this.QUE = queue;
 			this.KernelCompiler = compiler;
+
+			// Test + success Log()
+			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
 		}
 
 
@@ -85,7 +89,7 @@ namespace OOCL.OpenCl
 				return; // Logging is disabled
 			}
 
-			this.logger.Info(msg);
+			this.logger.Log(msg);
 		}
 
 
