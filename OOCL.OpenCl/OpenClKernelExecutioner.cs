@@ -1,4 +1,5 @@
-﻿using OpenTK.Compute.OpenCL;
+﻿using OOCL.Core;
+using OpenTK.Compute.OpenCL;
 using OpenTK.Mathematics;
 using System.Diagnostics;
 
@@ -43,19 +44,26 @@ namespace OOCL.OpenCl
 		private CLKernel? Kernel => this.KernelCompiler?.Kernel;
 		public string KernelFile => this.KernelCompiler?.KernelFile ?? string.Empty;
 
-
+		// Log4net path
+		public bool EnableLogging { get; set; } = true;
+		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
+		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Executioner");
 
 
 		// ----- ----- -----  CONSTRUCTOR ----- ----- ----- \\
 		public OpenClKernelExecutioner(string repopath, OpenClMemoryRegister memR, CLContext context, CLDevice device, CLPlatform platform, CLCommandQueue queue, OpenClKernelCompiler compiler)
 		{
 			this.Repopath = repopath;
+
 			this.MemoryRegister = memR;
 			this.CTX = context;
 			this.DEV = device;
 			this.PLAT = platform;
 			this.QUE = queue;
 			this.KernelCompiler = compiler;
+
+			// Test + success Log()
+			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
 		}
 
 
@@ -75,6 +83,13 @@ namespace OOCL.OpenCl
 
 			// Invoke optionally
 			Console.WriteLine(msg);
+
+			if (!this.EnableLogging)
+			{
+				return; // Logging is disabled
+			}
+
+			this.logger.Log(msg);
 		}
 
 
@@ -89,7 +104,7 @@ namespace OOCL.OpenCl
 
 
 		// EXEC
-		public IntPtr ExecuteFFT(IntPtr pointer, string version = "01", char form = 'f', int chunkSize = 16384, float overlap = 0.5f, bool free = true, bool log = false)
+		public IntPtr ExecuteFFT(IntPtr pointer, string version = "01", char form = 'f', int chunkSize = 16384, float overlap = 0.5f, bool free = true)
 		{
 			int overlapSize = (int) (overlap * chunkSize);
 
@@ -118,7 +133,7 @@ namespace OOCL.OpenCl
 			ClMem? inputBuffers = this.MemoryRegister.GetBuffer(pointer);
 			if (inputBuffers == null || inputBuffers.GetCount() <= 0)
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Input buffer not found or invalid length: " + pointer.ToString("X16"), "", 2);
 				}
@@ -137,7 +152,7 @@ namespace OOCL.OpenCl
 			}
 			if (outputBuffers == null || outputBuffers.GetCount() <= 0 || outputBuffers.GetLengths().Any(l => l < 1))
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Couldn't allocate valid output buffers / lengths", "", 2);
 				}
@@ -150,7 +165,7 @@ namespace OOCL.OpenCl
 			if (error != CLResultCode.Success)
 			{
 				this.lastError = error;
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Failed to set kernel argument for chunk size: " + error, "", 2);
 				}
@@ -160,7 +175,7 @@ namespace OOCL.OpenCl
 			if (error != CLResultCode.Success)
 			{
 				this.lastError = error;
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Failed to set kernel argument for overlap size: " + error, "", 2);
 				}
@@ -181,7 +196,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Failed to set kernel argument for input buffer {i}: {error}", "", 2);
 					}
@@ -191,7 +206,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Failed to set kernel argument for output buffer {i}: {error}", "", 2);
 					}
@@ -203,7 +218,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Failed to enqueue kernel for buffer {i}: " + error, "", 2);
 					}
@@ -216,7 +231,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Wait failed for buffer {i}: " + error, "", 2);
 					}
@@ -230,7 +245,7 @@ namespace OOCL.OpenCl
 			sw.Stop();
 
 			// LOG SUCCESS
-			if (log)
+			if (this.EnableLogging)
 			{
 				if (form == 'f')
 				{
@@ -255,7 +270,7 @@ namespace OOCL.OpenCl
 			return outputBuffers[0].Handle;
 		}
 
-		public IntPtr ExecuteAudioKernel(IntPtr objPointer, out double factor, long length = 0, string kernelName = "normalize", string version = "00", int chunkSize = 1024, float overlap = 0.5f, int samplerate = 44100, int bitdepth = 24, int channels = 2, Dictionary<string, object>? optionalArguments = null, bool log = false)
+		public IntPtr ExecuteAudioKernel(IntPtr objPointer, out double factor, long length = 0, string kernelName = "normalize", string version = "00", int chunkSize = 1024, float overlap = 0.5f, int samplerate = 44100, int bitdepth = 24, int channels = 2, Dictionary<string, object>? optionalArguments = null)
 		{
 			factor = 1.000d; // Default factor
 
@@ -273,7 +288,7 @@ namespace OOCL.OpenCl
 				this.KernelCompiler.LoadKernel("", kernelPath);
 				if (this.Kernel == null || this.KernelFile == null || !this.KernelFile.Contains("\\Audio\\"))
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log("Kernel not loaded or invalid kernel file: " + kernelName, "", 2);
 					}
@@ -286,7 +301,7 @@ namespace OOCL.OpenCl
 			ClMem? inputMem = this.MemoryRegister.GetBuffer(objPointer);
 			if (inputMem == null || inputMem.GetCount() <= 0 || inputMem.GetLengths().Any(l => l < 1))
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Input buffer not found or invalid length: " + objPointer.ToString("X16"), "", 2);
 				}
@@ -323,7 +338,7 @@ namespace OOCL.OpenCl
 					factor = 1.000d;
 				}
 
-				IntPtr fftPointer = this.ExecuteFFT(objPointer, "01", 'f', chunkSize, overlap, true, log);
+				IntPtr fftPointer = this.ExecuteFFT(objPointer, "01", 'f', chunkSize, overlap, true);
 				if (fftPointer == IntPtr.Zero)
 				{
 					return IntPtr.Zero;
@@ -338,7 +353,7 @@ namespace OOCL.OpenCl
 					this.KernelCompiler.LoadKernel("", kernelPath);
 					if (this.Kernel == null || this.KernelFile == null || !this.KernelFile.Contains("\\Audio\\"))
 					{
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log("Kernel not loaded or invalid kernel file: " + kernelName, "", 2);
 						}
@@ -352,7 +367,7 @@ namespace OOCL.OpenCl
 			inputMem = this.MemoryRegister.GetBuffer(objPointer);
 			if (inputMem == null || inputMem.GetCount() <= 0 || inputMem.GetLengths().Any(l => l < 1))
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Input buffer not found or invalid length: " + objPointer.ToString("X16"), "", 2);
 				}
@@ -371,7 +386,7 @@ namespace OOCL.OpenCl
 			}
 			else
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Unsupported input buffer type: " + inputMem.Type, "", 2);
 				}
@@ -381,7 +396,7 @@ namespace OOCL.OpenCl
 
 			if (outputMem == null || outputMem.GetCount() == 0 || outputMem.GetLengths().Any(l => l < 1))
 			{
-				if (log)
+				if (this.EnableLogging)
 				{
 					this.Log("Couldn't allocate valid output buffers / lengths", "", 2);
 				}
@@ -398,10 +413,10 @@ namespace OOCL.OpenCl
 				CLBuffer outputBuffer = outputMem[i];
 
 				// Merge arguments
-				List<object> arguments = this.MergeArgumentsAudio(variableArguments, inputBuffer, outputBuffer, length, chunkSize, overlap, samplerate, bitdepth, channels, optionalArguments, false);
+				List<object> arguments = this.MergeArgumentsAudio(variableArguments, inputBuffer, outputBuffer, length, chunkSize, overlap, samplerate, bitdepth, channels, optionalArguments);
 				if (arguments == null || arguments.Count == 0)
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log("Failed to merge arguments for buffer " + i, "", 2);
 					}
@@ -417,7 +432,7 @@ namespace OOCL.OpenCl
 					if (error != CLResultCode.Success)
 					{
 						this.lastError = error;
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log($"Failed to set kernel argument {j} for buffer {i}: " + error, "", 2);
 						}
@@ -444,7 +459,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Failed to enqueue kernel for buffer {i}: " + error, "", 2);
 					}
@@ -456,7 +471,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Wait failed for buffer {i}: " + error, "", 2);
 					}
@@ -467,7 +482,7 @@ namespace OOCL.OpenCl
 				if (error != CLResultCode.Success)
 				{
 					this.lastError = error;
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Failed to release event for buffer {i}: " + error, "", 2);
 					}
@@ -480,7 +495,7 @@ namespace OOCL.OpenCl
 				long freed = this.MemoryRegister.FreeBuffer(objPointer, true);
 				if (freed > 0)
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log("Freed input buffer: " + objPointer.ToString("X16") + ", Freed " + freed + " Mbytes", "", 1);
 					}
@@ -491,7 +506,7 @@ namespace OOCL.OpenCl
 			IntPtr outputPointer = outputMem[0].Handle;
 			if (didFft && outputMem.Type == typeof(Vector2).Name)
 			{
-				IntPtr ifftPointer = this.ExecuteFFT(outputMem[0].Handle, "01", 'c', chunkSize, overlap, true, log);
+				IntPtr ifftPointer = this.ExecuteFFT(outputMem[0].Handle, "01", 'c', chunkSize, overlap, true);
 				if (ifftPointer == IntPtr.Zero)
 				{
 					return IntPtr.Zero;
@@ -501,7 +516,7 @@ namespace OOCL.OpenCl
 			}
 
 			// Log success
-			if (log)
+			if (this.EnableLogging)
 			{
 				this.Log($"Executed kernel '{kernelName}' successfully on {inputMem.Count} buffers with chunk size {chunkSize} and overlap {overlap}", "", 1);
 			}
@@ -593,7 +608,7 @@ namespace OOCL.OpenCl
 			times.Add(sw.ElapsedMilliseconds - times.Sum());
 
 			// Merge arguments
-			List<object> arguments = this.MergeArgumentsImage(variableArguments ?? [], pointer, outputPointer, width, height, channels, bitdepth, false);
+			List<object> arguments = this.MergeArgumentsImage(variableArguments ?? [], pointer, outputPointer, width, height, channels, bitdepth);
 
 			// Set kernel arguments
 			for (int i = 0; i < arguments.Count; i++)
@@ -681,7 +696,7 @@ namespace OOCL.OpenCl
 
 
 		// Helpers
-		public List<object> MergeArgumentsAudio(object[] variableArguments, CLBuffer inputBuffer, CLBuffer outputBuffer, long length, int chunkSize, float overlap, int samplerate, int bitdepth, int channels, Dictionary<string, object>? optionalArgs = null, bool log = false)
+		public List<object> MergeArgumentsAudio(object[] variableArguments, CLBuffer inputBuffer, CLBuffer outputBuffer, long length, int chunkSize, float overlap, int samplerate, int bitdepth, int channels, Dictionary<string, object>? optionalArgs = null)
 		{
 			List<object> arguments = [];
 
@@ -707,7 +722,7 @@ namespace OOCL.OpenCl
 				Type type = definitions[key];
 				if (type.Name.Contains("*") && key.Contains("in"))
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding input buffer for key '{key}'", "", 2);
 					}
@@ -716,7 +731,7 @@ namespace OOCL.OpenCl
 				}
 				else if (type.Name.Contains("*") && key.Contains("out"))
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding output buffer for key '{key}'", "", 2);
 					}
@@ -725,7 +740,7 @@ namespace OOCL.OpenCl
 				}
 				else if ((type == typeof(long) || type == typeof(int)) && key.Contains("len"))
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding length for key '{key}': {(chunkSize > 0 ? chunkSize : length)}", "", 2);
 					}
@@ -734,7 +749,7 @@ namespace OOCL.OpenCl
 				}
 				else if (type == typeof(int) && key.Contains("chunk"))
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding chunk size for key '{key}': {chunkSize}", "", 2);
 					}
@@ -743,7 +758,7 @@ namespace OOCL.OpenCl
 				}
 				else if (type == typeof(int) && key.Contains("overlap"))
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding overlap size for key '{key}': {overlapSize}", "", 2);
 					}
@@ -752,7 +767,7 @@ namespace OOCL.OpenCl
 				}
 				else if (type == typeof(int) && key == "samplerate")
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding samplerate for key '{key}': {samplerate}", "", 2);
 					}
@@ -761,7 +776,7 @@ namespace OOCL.OpenCl
 				}
 				else if (type == typeof(int) && key == "bit")
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding bitdepth for key '{key}': {bitdepth}", "", 2);
 					}
@@ -770,7 +785,7 @@ namespace OOCL.OpenCl
 				}
 				else if (type == typeof(int) && key == "channel")
 				{
-					if (log)
+					if (this.EnableLogging)
 					{
 						this.Log($"Adding channels for key '{key}': {channels}", "", 2);
 					}
@@ -781,7 +796,7 @@ namespace OOCL.OpenCl
 				{
 					if (found < variableArguments.Length)
 					{
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log($"Adding variable argument for key '{key}': {variableArguments[found]}", "", 2);
 						}
@@ -790,7 +805,7 @@ namespace OOCL.OpenCl
 					}
 					else
 					{
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log($"Missing variable argument for key '{key}'", "", 2);
 						}
@@ -812,7 +827,7 @@ namespace OOCL.OpenCl
 					int index = definitions.Keys.ToList().FindIndex(k => k.ToLower().Contains(key.ToLower()));
 					if (index >= 0 && index < arguments.Count)
 					{
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log($"Replacing argument '{definitions.Keys.ElementAt(index)}' with optional value: {value}", "", 2);
 						}
@@ -820,7 +835,7 @@ namespace OOCL.OpenCl
 					}
 					else
 					{
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log($"Adding new optional argument '{key}': {value}", "", 2);
 						}
@@ -832,7 +847,7 @@ namespace OOCL.OpenCl
 			return arguments;
 		}
 
-		public List<object> MergeArgumentsImage(object[] arguments, IntPtr inputPointer = 0, IntPtr outputPointer = 0, int width = 0, int height = 0, int channels = 4, int bitdepth = 8, bool log = false)
+		public List<object> MergeArgumentsImage(object[] arguments, IntPtr inputPointer = 0, IntPtr outputPointer = 0, int width = 0, int height = 0, int channels = 4, int bitdepth = 8)
 		{
 			List<object> result = [];
 
@@ -892,7 +907,7 @@ namespace OOCL.OpenCl
 					result.Add(buffer);
 
 					// Log buffer found
-					if (log)
+					if (this.EnableLogging)
 					{
 						// Log buffer found
 						this.Log("Kernel argument buffer found: " + argPointer.ToString("X16"), "Index: " + i, 3);
@@ -906,7 +921,7 @@ namespace OOCL.OpenCl
 						result.Add(width <= 0 ? arguments[i] : width);
 
 						// Log width found
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log("Kernel argument width found: " + width.ToString(), "Index: " + i, 3);
 						}
@@ -916,7 +931,7 @@ namespace OOCL.OpenCl
 						result.Add(height <= 0 ? arguments[i] : height);
 
 						// Log height found
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log("Kernel argument height found: " + height.ToString(), "Index: " + i, 3);
 						}
@@ -926,7 +941,7 @@ namespace OOCL.OpenCl
 						result.Add(channels <= 0 ? arguments[i] : channels);
 
 						// Log channels found
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log("Kernel argument channels found: " + channels.ToString(), "Index: " + i, 3);
 						}
@@ -936,7 +951,7 @@ namespace OOCL.OpenCl
 						result.Add(bitdepth <= 0 ? arguments[i] : bitdepth);
 
 						// Log channels found
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log("Kernel argument bitdepth found: " + bitdepth.ToString(), "Index: " + i, 3);
 						}
@@ -946,7 +961,7 @@ namespace OOCL.OpenCl
 						result.Add(bpp <= 0 ? arguments[i] : bpp);
 
 						// Log channels found
-						if (log)
+						if (this.EnableLogging)
 						{
 							this.Log("Kernel argument bpp found: " + bpp.ToString(), "Index: " + i, 3);
 						}
@@ -972,7 +987,7 @@ namespace OOCL.OpenCl
 			}
 
 			// Log arguments
-			if (log)
+			if (this.EnableLogging)
 			{
 				this.Log("Kernel arguments: " + string.Join(", ", result.Select(a => a.ToString())), "'" + Path.GetFileName(this.KernelFile) + "'", 2);
 			}

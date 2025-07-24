@@ -1,0 +1,5 @@
+ ~~~ ~~~ ~~~ Log created for 'OpenCL-Register' at [2025-07-24 10:34:26.441] ~~~ ~~~ ~~~ 
+
+
+
+[2025-07-24 10:34:26.441] [Memory]: OpenCL Service initialized. (Log at: D:\REPOS\OOCL\OOCL.OpenCl/_Logs/OpenClMemoryRegister.log)

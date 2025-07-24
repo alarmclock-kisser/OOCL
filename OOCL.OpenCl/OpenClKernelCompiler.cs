@@ -1,4 +1,5 @@
-﻿using OpenTK.Compute.OpenCL;
+﻿using OOCL.Core;
+using OpenTK.Compute.OpenCL;
 using OpenTK.Mathematics;
 using System.Text;
 
@@ -117,7 +118,10 @@ namespace OOCL.OpenCl
 		public IEnumerable<string> ArgumentNames => this.Arguments.Keys;
 		public IEnumerable<string> ArgumentTypes => this.Arguments.Values.Select(t => t.Name);
 
-
+		// Log4net path
+		public bool EnableLogging { get; set; } = true;
+		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
+		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Compiler");
 
 
 		// ----- ----- ----- CONSTRUCTORS ----- ----- ----- \\
@@ -125,6 +129,7 @@ namespace OOCL.OpenCl
 		{
 			// Set attributes
 			this.Repopath = repopath;
+
 			this.MemoryRegister = memoryRegister;
 			this.CTX = ctx;
 			this.DEV = dev;
@@ -133,6 +138,8 @@ namespace OOCL.OpenCl
 
 			this.PrecompileAllKernels(this.PrecompileAndCache);
 
+			// Test + success Log()
+			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
 		}
 
 
@@ -157,6 +164,13 @@ namespace OOCL.OpenCl
 
 			// Invoke optionally
 			Console.WriteLine(msg);
+
+			if (!this.EnableLogging)
+			{
+				return; // Logging is disabled
+			}
+
+			this.logger.Log(msg);
 		}
 
 		// Dispose

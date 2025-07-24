@@ -338,7 +338,7 @@
             AddLogEntry($"Error executing Mandelbrot kernel: {ex.Message}");
         }
 
-        return new ImageObjInfo(null);
+        return new ImageObjInfo();
     }
 
     private async Task OnImageKeyDown(KeyboardEventArgs e)
