@@ -101,7 +101,7 @@ namespace OOCL.OpenCl
 			}
 			else if (form == 'c')
 			{
-				file = Path.Combine(kernelsPath, $"ifft{version}01.cl");
+				file = Path.Combine(kernelsPath, $"ifft{version}.cl");
 			}
 
 			// STOPWATCH START
@@ -260,10 +260,10 @@ namespace OOCL.OpenCl
 			factor = 1.000d; // Default factor
 
 			// Get kernel path
-			string kernelPath = this.KernelCompiler.KernelFiles.FirstOrDefault(f => f.Contains(kernelName + version)) ?? "";
+			string kernelPath = this.KernelCompiler.KernelFiles.FirstOrDefault(f => f.ToLower().Contains((kernelName + version).ToLower())) ?? "";
 			if (string.IsNullOrEmpty(kernelPath))
 			{
-				this.Log("Kernel file not found: " + kernelName, "", 2);
+				this.Log("Kernel file not found: " + kernelName + version, "", 2);
 				return IntPtr.Zero;
 			}
 
@@ -335,7 +335,7 @@ namespace OOCL.OpenCl
 				// Load kernel if not loaded
 				if (this.Kernel == null || this.KernelFile != kernelPath)
 				{
-					this.KernelCompiler.LoadKernel(kernelName, "");
+					this.KernelCompiler.LoadKernel("", kernelPath);
 					if (this.Kernel == null || this.KernelFile == null || !this.KernelFile.Contains("\\Audio\\"))
 					{
 						if (log)
@@ -518,7 +518,7 @@ namespace OOCL.OpenCl
 			Stopwatch sw = Stopwatch.StartNew();
 
 			// Get kernel path
-			string kernelPath = this.KernelCompiler.KernelFiles.FirstOrDefault(f => f.Contains(kernelName + version)) ?? "";
+			string kernelPath = this.KernelCompiler.KernelFiles.FirstOrDefault(f => f.ToLower().Contains((kernelName + version).ToLower())) ?? "";
 
 			// Load kernel if not loaded
 			if (this.Kernel == null || this.KernelFile != kernelPath)

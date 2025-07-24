@@ -91,11 +91,18 @@
 
 
 
+
+
+
+
     private OpenClServiceInfo openClServiceInfo = new(null);
 
     private Guid selectedImageId = Guid.Empty;
     private IEnumerable<ImageObjInfo> imageInfos = [];
 
+
+
+    private string base64Format = "png";
     private string prevImageBase64 = string.Empty;
     private string imageBase64 = string.Empty;
 
@@ -278,9 +285,9 @@
 
         try
         {
-            string code = (await ApiClient.GetBase64Image(guid.Value)).Base64Image;
+            string code = (await ApiClient.GetBase64Image(guid.Value, base64Format)).Base64Image;
             imageBase64 = $"data:image/png;base64,{code}";
-            AddLogEntry($"Retrieved base64 string from '{guid}' (length: {code.Length})");
+            AddLogEntry($"Retrieved base64 string from '{guid.Value}' (length: {code.Length})");
         }
         catch (Exception ex)
         {
@@ -298,7 +305,7 @@
         if (!openClServiceInfo.Initialized)
         {
             AddLogEntry("OpenCL is not initialized. Please select a device and initialize it first.");
-            return new ImageObjInfo(null);
+            return new ImageObjInfo();
         }
 
         try
@@ -312,7 +319,7 @@
             if (result.Id == Guid.Empty)
             {
                 AddLogEntry("Mandelbrot execution returned null result.");
-                return new ImageObjInfo(null);
+                return new ImageObjInfo();
             }
 
             await RefreshInfos();
@@ -323,7 +330,6 @@
 
             lastProcessingTime = result.LastProcessingTime;
             await LoadImage(selectedImageId);
-            await ApiClient.RemoveImage(prevImageGuid);
 
             return result;
         }

@@ -27,7 +27,7 @@
 <!-- Waveform visualizer section: Narrow image with current info -->
 <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.1rem" class="rz-p-sm-12" Reverse="false">
     <RadzenImage Name="ImageWaveform" Style="width: 100%; height: 200px; object-fit: contain;" Src="@waveformBase64" Placeholder="Loading waveform..." />
-    <RadzenText Text="@selectedInfoString" TextStyle="TextStyle.Body1" Style="max-width: 600px; overflow-wrap: break-word; white-space: pre-wrap; font-family: Arial;" />
+    <RadzenText Text="@selectedInfoString" TextStyle="TextStyle.Body1" Style="width: 100%; overflow-wrap: break-word; white-space: pre-wrap; font-family: Arial;" />
 </RadzenStack>
 
 <!-- Last error messages -->
@@ -97,11 +97,8 @@
 
     private AudioObjInfo selectedAudioInfo => audioInfos.FirstOrDefault(info => info.Id == selectedAudioGuid) ?? new AudioObjInfo(null);
 
-    private int shortenInfoLength = 0;
-    private bool singleLineInfo = false;
     private string selectedInfoString => selectedAudioInfo.ToString();
 
-    private string kernelError = string.Empty;
     private IEnumerable<OpenClKernelInfo> kernelInfos = [];
     public string kernelFilter { get; set; } = "stretch";
     private string selectedKernelName = string.Empty;
@@ -195,21 +192,7 @@
             // Get audio infos
             audioInfos = await ApiClient.GetAudioInfos();
 
-            // Get kernel infos
-            kernelError = string.Empty; // Reset error
-
-            var (success, message, kernels) =
-                await ApiClient.GetOpenClKernelInfos(kernelFilter);
-
-            if (!success)
-            {
-                kernelError = message;
-                kernelInfos = [];
-            }
-            else
-            {
-                kernelInfos = kernels;
-            }
+            kernelInfos = await ApiClient.GetOpenClKernelInfos(kernelFilter);
 
             StateHasChanged();
 

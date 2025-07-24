@@ -1727,6 +1727,16 @@
 				"tags": [
 					"OpenCl"
 				],
+				"parameters": [
+					{
+						"name": "magnitude",
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"default": "KB"
+						}
+					}
+				],
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -1948,46 +1958,6 @@
 									"items": {
 										"$ref": "#/components/schemas/OpenClKernelInfo"
 									}
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "Not Found",
-						"content": {
-							"text/plain": {
-								"schema": {
-									"$ref": "#/components/schemas/ProblemDetails"
-								}
-							},
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ProblemDetails"
-								}
-							},
-							"text/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ProblemDetails"
-								}
-							}
-						}
-					},
-					"500": {
-						"description": "Internal Server Error",
-						"content": {
-							"text/plain": {
-								"schema": {
-									"$ref": "#/components/schemas/ProblemDetails"
-								}
-							},
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ProblemDetails"
-								}
-							},
-							"text/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ProblemDetails"
 								}
 							}
 						}
@@ -2586,57 +2556,46 @@
 				"properties": {
 					"id": {
 						"type": "string",
-						"format": "uuid",
-						"readOnly": true
+						"format": "uuid"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"filepath": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"onHost": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"sizeMb": {
 						"type": "number",
-						"format": "float",
-						"readOnly": true
+						"format": "float"
 					},
 					"pointerHex": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataStructure": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"width": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"height": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"base64Format": {
 						"type": "string",
@@ -2644,8 +2603,7 @@
 					},
 					"base64Image": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					}
 				},
 				"additionalProperties": false
@@ -2655,91 +2613,73 @@
 				"properties": {
 					"id": {
 						"type": "string",
-						"format": "uuid",
-						"readOnly": true
+						"format": "uuid"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"filepath": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"onHost": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"sizeMb": {
 						"type": "number",
-						"format": "float",
-						"readOnly": true
+						"format": "float"
 					},
 					"pointerHex": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataStructure": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"samplerate": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"channels": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"bitdepth": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"lenght": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"chunkSize": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"overlapSize": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"form": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"stretchFactor": {
 						"type": "number",
-						"format": "double",
-						"readOnly": true
+						"format": "double"
 					},
 					"playing": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"playbackState": {
 						"type": "string",
@@ -2748,18 +2688,15 @@
 					},
 					"volume": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"duration": {
 						"type": "number",
-						"format": "double",
-						"readOnly": true
+						"format": "double"
 					},
 					"currentTime": {
 						"type": "number",
-						"format": "double",
-						"readOnly": true
+						"format": "double"
 					},
 					"lastLoadingTime": {
 						"type": "number",
@@ -2785,57 +2722,46 @@
 				"properties": {
 					"id": {
 						"type": "string",
-						"format": "uuid",
-						"readOnly": true
+						"format": "uuid"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"filepath": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"onHost": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"sizeMb": {
 						"type": "number",
-						"format": "float",
-						"readOnly": true
+						"format": "float"
 					},
 					"pointerHex": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataStructure": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"width": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"height": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"base64Format": {
 						"type": "string",
@@ -2843,8 +2769,7 @@
 					},
 					"base64Image": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					}
 				},
 				"additionalProperties": false
@@ -2854,67 +2779,54 @@
 				"properties": {
 					"id": {
 						"type": "string",
-						"format": "uuid",
-						"readOnly": true
+						"format": "uuid"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"filepath": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"onHost": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"sizeMb": {
 						"type": "number",
-						"format": "float",
-						"readOnly": true
+						"format": "float"
 					},
 					"pointerHex": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataStructure": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"width": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"height": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"channels": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"bitdepth": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"lastLoadingTime": {
 						"type": "number",
@@ -2936,40 +2848,33 @@
 				"properties": {
 					"index": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"type": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"online": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"status": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"errorMessages": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"timestamp": {
 						"type": "string",
@@ -3005,40 +2910,33 @@
 				"properties": {
 					"index": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"type": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"online": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"status": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"errorMessages": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"timestamp": {
 						"type": "string",
@@ -3052,44 +2950,37 @@
 					},
 					"argumentsCount": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"argumentNames": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"argumentType": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"inputPointerType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"outputPointerType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"mediaType": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"functionName": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					}
 				},
 				"additionalProperties": false
@@ -3099,40 +2990,33 @@
 				"properties": {
 					"index": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"type": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"online": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"status": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"errorMessages": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"timestamp": {
 						"type": "string",
@@ -3146,59 +3030,49 @@
 					},
 					"id": {
 						"type": "string",
-						"format": "uuid",
-						"readOnly": true
+						"format": "uuid"
 					},
 					"pointers": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"lengths": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"indexPointer": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"indexLength": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"count": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"totalLength": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"dataTypeSize": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"dataTypeName": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"totalSizeBytes": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					}
 				},
 				"additionalProperties": false
@@ -3208,40 +3082,33 @@
 				"properties": {
 					"index": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"type": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"online": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"status": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"errorMessages": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"timestamp": {
 						"type": "string",
@@ -3276,40 +3143,33 @@
 				"properties": {
 					"index": {
 						"type": "integer",
-						"format": "int32",
-						"readOnly": true
+						"format": "int32"
 					},
 					"name": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"type": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"online": {
-						"type": "boolean",
-						"readOnly": true
+						"type": "boolean"
 					},
 					"status": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"meta": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"errorMessages": {
 						"type": "array",
 						"items": {
 							"type": "string"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"timestamp": {
 						"type": "string",
@@ -3323,23 +3183,19 @@
 					},
 					"totalMemory": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"usedMemory": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"freeMemory": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"usagePercentage": {
 						"type": "string",
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"sizeUnit": {
 						"type": "string",
@@ -3350,8 +3206,7 @@
 						"items": {
 							"$ref": "#/components/schemas/PieChartData"
 						},
-						"nullable": true,
-						"readOnly": true
+						"nullable": true
 					},
 					"magnitude": {
 						"type": "string",

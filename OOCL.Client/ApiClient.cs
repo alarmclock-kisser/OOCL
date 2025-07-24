@@ -94,9 +94,9 @@ namespace OOCL.Client
 			}
 		}
 
-		public async Task<OpenClUsageInfo> GetOpenClUsageInfo()
+		public async Task<OpenClUsageInfo> GetOpenClUsageInfo(string magnitude = "KB")
 		{
-			var task = this.internalClient.UsageAsync();
+			var task = this.internalClient.UsageAsync(magnitude);
 
 			try
 			{
@@ -124,21 +124,28 @@ namespace OOCL.Client
 			}
 		}
 
-		public async Task<(bool Success, string Message, ICollection<OpenClKernelInfo> Kernels)> GetOpenClKernelInfos(string filter = "")
+		public async Task<ICollection<OpenClKernelInfo>> GetOpenClKernelInfos(string filter = "")
 		{
 			try
 			{
-				var response = await internalClient.KernelsAsync(filter);
-				return (true, string.Empty, response);
+				var task = this.internalClient.KernelsAsync(filter);
+				var result = await task;
+				if (result.Count() <= 0)
+				{
+					Console.WriteLine("No OpenCL kernels found. " + (string.IsNullOrEmpty(filter) ? "No filter applied." : $"Filter was '{filter}'"));
+					return Array.Empty<OpenClKernelInfo>();
+				}
+
+				return result;
 			}
 			catch (ApiException ex) when (ex.StatusCode == 404)
 			{
-				return (false, "Kernel service not available", []);
+				return (Array.Empty<OpenClKernelInfo>());
 			}
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex);
-				return (false, ex.Message, []);
+				return (Array.Empty<OpenClKernelInfo>());
 			}
 		}
 

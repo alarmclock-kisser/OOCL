@@ -12,9 +12,11 @@ namespace OOCL.Shared
 	{
 		public Guid Id { get; set; } = Guid.Empty;
 
-		public string Name { get; set; } = string.Empty;
+		public string Name { get; set; } = "No name available.";
 
-		public string Filepath { get; set; } = string.Empty;
+		public string Filepath { get; set; } = "No file path available.";
+
+		public string Extension { get; set; } = "No file format available.";
 
 		public string Meta { get; set; } = string.Empty;
 
@@ -22,7 +24,7 @@ namespace OOCL.Shared
 
 		public float SizeMb { get; set; } = 0.0f;
 
-		public string PointerHex { get; set; } = string.Empty;
+		public string PointerHex { get; set; } = "null";
 
 		public string DataType { get; set; } = "void";
 
@@ -43,6 +45,7 @@ namespace OOCL.Shared
 			this.Id = obj.Id;
 			this.Name = obj.Name;
 			this.Filepath = obj.Filepath;
+			this.Extension = Path.GetExtension(obj.Filepath).ToUpperInvariant();
 			this.Meta = obj.Meta;
 			this.OnHost = obj.OnHost;
 			this.SizeMb = obj.SizeMb;

@@ -43,7 +43,14 @@ namespace OOCL.Shared
 
 		public override string ToString()
 		{
-			return $"ImageObjInfo: {this.Name} ({this.Width}x{this.Height}, {this.Channels} channels, {this.Bitdepth} bit)";
+			return $"'{this.Name}' <{(this.Extension)}>" + "\n" +
+				$"({this.Id})" + "\n\n" +
+				$"{this.Width}x{this.Height} px ({(this.Bitdepth * this.Channels)} bpp)" + "\n\n" +
+				$"{this.SizeMb} MB as {this.DataType}{this.DataStructure} on {(this.OnHost ? "Host" : "OpenCL")}" + "\n" +
+				$"<{this.PointerHex}>" + "\n\n" +
+				$"Initially loaded within {this.LastLoadingTime.ToString("F3")} sec." + "\n" +
+				$"Last processing within {this.LastProcessingTime.ToString("F3")} sec." + "\n" +
+				$"{(string.IsNullOrEmpty(this.ErrorMessage) ? "No errors." : $"Error: {this.ErrorMessage}")}";
 		}
 	}
 }

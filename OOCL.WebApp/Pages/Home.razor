@@ -54,7 +54,7 @@
         </RadzenPieSeries>
     </RadzenChart>
     <RadzenStack Orientation="Orientation.Vertical" Style="width: 35vh" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Gap="0.1rem" class="rz-p-sm-12" Reverse="false">
-        <RadzenDropDown @bind-Value="@selectedSizeMagnitude" TValue="string" Data="sizeMagnitudes" SelectedItem="@("KB")" @onchange="@RefreshInfos"></RadzenDropDown>
+        <RadzenDropDown @bind-Value="@selectedSizeMagnitude" TValue="string" Data="sizeMagnitudes" SelectedItem="@("KB")" Change="@RefreshInfos"></RadzenDropDown>
         <RadzenText Text="@($"Total: {openClUsageInfo.TotalMemory} {selectedSizeMagnitude}")" />
         <RadzenText Text="@($"Used: {openClUsageInfo.UsedMemory} {selectedSizeMagnitude}")" />
         <RadzenText Text="@($"Free: {openClUsageInfo.FreeMemory} {selectedSizeMagnitude}")" />
@@ -98,14 +98,13 @@
     public string LogPrefix { get; set; } = "[/home] ";
 
     private int selectedOpenClDeviceIndex = -1;
-    private OpenClServiceInfo openClServiceInfo = new OpenClServiceInfo(null);
-    private OpenClUsageInfo openClUsageInfo = new OpenClUsageInfo(null);
+    private OpenClServiceInfo openClServiceInfo = new OpenClServiceInfo();
+    private OpenClUsageInfo openClUsageInfo = new OpenClUsageInfo();
 
     private IEnumerable<OpenClDeviceInfo> openClDeviceInfos = [];
     private IEnumerable<OpenClKernelInfo> openClKernelInfos = [];
     private IEnumerable<OpenClMemoryInfo> openClMemoryInfos = [];
 
-    private string kernelError = string.Empty;
     private string kernelFilter = string.Empty;
 
     private string buttonInitializeColor = "#e0e0e0";
@@ -115,11 +114,8 @@
     private string selectedSizeMagnitude = "KB";
     private IEnumerable<string> sizeMagnitudes = new List<string>
     {
-        "B", "KB", "MB", "GB", "TB"
+        "B", "KB", "MB", "GB"
     };
-
-    // 1, 1024, 1048576, 1073741824, 1099511627776
-    private long sizeMagnitudeFactor => (long)Math.Pow(1024, sizeMagnitudes.ToList().IndexOf(selectedSizeMagnitude));
 
     private IEnumerable<string> pieChartColors = new List<string>
     {
@@ -168,23 +164,10 @@
         // Get OpenCL infos
         openClServiceInfo = await ApiClient.GetOpenClServiceInfo();
         StateHasChanged();
-        openClUsageInfo = await ApiClient.GetOpenClUsageInfo();
+        openClUsageInfo = await ApiClient.GetOpenClUsageInfo(selectedSizeMagnitude);
         openClDeviceInfos = await ApiClient.GetOpenClDeviceInfos();
         
-        kernelError = string.Empty; // Reset error
-
-        var (success, message, kernels) =
-            await ApiClient.GetOpenClKernelInfos(kernelFilter);
-
-        if (!success)
-        {
-            kernelError = message;
-            openClKernelInfos = [];
-        }
-        else
-        {
-            openClKernelInfos = kernels;
-        }
+        openClKernelInfos = await ApiClient.GetOpenClKernelInfos(kernelFilter);
 
         StateHasChanged();
 

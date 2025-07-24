@@ -16,7 +16,8 @@ namespace OOCL.Api.Controllers
         private readonly AudioCollection audioCollection;
         private readonly IClipboard clipboard;
 
-        private Task<OpenClServiceInfo> statusInfoTask =>
+
+		private Task<OpenClServiceInfo> statusInfoTask =>
             Task.Run(() => new OpenClServiceInfo(this.openClService));
 
         private Task<IEnumerable<OpenClDeviceInfo>> deviceInfosTask =>
@@ -25,8 +26,9 @@ namespace OOCL.Api.Controllers
                 return this.openClService.GetDevices().Select((device, index) => new OpenClDeviceInfo(this.openClService, index));
             });
 
+		public string sizeMagnitude { get; set; } = "KB";
 		private Task<OpenClUsageInfo> usageInfoTask =>
-            Task.Run(() => new OpenClUsageInfo(this.openClService.MemoryRegister));
+            Task.Run(() => new OpenClUsageInfo(this.openClService.MemoryRegister, this.sizeMagnitude));
 
         private Task<IEnumerable<OpenClMemoryInfo>> memoryInfosTask =>
 			Task.Run(() =>
@@ -41,7 +43,7 @@ namespace OOCL.Api.Controllers
             {
                 return this.openClService.KernelCompiler?.KernelFiles
                     .Select((file, index) => new OpenClKernelInfo(this.openClService.KernelCompiler, index))
-                    .Where(i => i.Name.Contains(this.kernelFilter))?? [];
+                    .Where(i => i.Filepath.ToLower().Contains(this.kernelFilter.ToLower()))?? [];
             });
 
 		public bool FlagReadable { get; set; } = false;
@@ -181,8 +183,10 @@ namespace OOCL.Api.Controllers
 		[ProducesResponseType(typeof(OpenClUsageInfo), 200)]
 		[ProducesResponseType(typeof(OpenClUsageInfo), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
-		public async Task<ActionResult<OpenClUsageInfo>> GetUsage()
+		public async Task<ActionResult<OpenClUsageInfo>> GetUsage(string magnitude = "KB")
 		{
+			this.sizeMagnitude = magnitude;
+
 			try
 			{
 				if (this.openClService.MemoryRegister == null)
@@ -231,13 +235,15 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("kernels/{filter?}")]
-		public async Task<ActionResult<IEnumerable<OpenClKernelInfo>>> GetKernels(string? filter = null)
+		[HttpGet("kernels/{filter}")]
+		public async Task<ActionResult<IEnumerable<OpenClKernelInfo>>> GetKernels(string filter = "")
 		{
 			if (this.openClService.KernelCompiler == null)
 			{
 				return this.Ok(Array.Empty<OpenClKernelInfo>());
 			}
+
+			this.kernelFilter = filter ?? string.Empty;
 
 			var kernels = await this.kernelInfosTask;
 			return this.Ok(kernels.Any() ? kernels : Array.Empty<OpenClKernelInfo>());
@@ -404,6 +410,7 @@ namespace OOCL.Api.Controllers
 				Stopwatch sw = Stopwatch.StartNew();
 				var result = await this.openClService.ExecuteAudioKernel(
 					obj, kernel, version, chunkSize, overlap, optionalArguments, true);
+				
 				sw.Stop();
 
 				var info = await Task.Run(() => new AudioObjInfo(obj));

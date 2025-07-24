@@ -10,9 +10,10 @@ namespace OOCL.Shared
         public int Channels { get; set; } = 0;
         public int Bitdepth { get; set; } = 0;
         public int Lenght { get; set; } = 0;
-        public int ChunkSize { get; set; } = 0;
+        public float Bpm { get; set; } = 0.0f;
+		public int ChunkSize { get; set; } = 0;
         public int OverlapSize { get; set; } = 0;
-        public string Form { get; set; } = string.Empty;
+        public string Form { get; set; } = "empty";
         public double StretchFactor { get; set; } = 1.0;
         public bool Playing { get; set; } = false;
         public string PlaybackState => this.Playing ? "Playing" : "Stopped";
@@ -24,7 +25,6 @@ namespace OOCL.Shared
 		public double LastProcessingTime { get; set; } = 0.0;
         public string ErrorMessage { get; set; } = string.Empty;
 
-        public float Bpm { get; set; } = 0.0f;
 
 		public AudioObjInfo()
         {
@@ -49,7 +49,8 @@ namespace OOCL.Shared
             this.Channels = audioObj.Channels;
             this.Bitdepth = audioObj.Bitdepth;
             this.Lenght = audioObj.Length;
-            this.ChunkSize = audioObj.ChunkSize;
+            this.Bpm = audioObj.Bpm;
+			this.ChunkSize = audioObj.ChunkSize;
             this.OverlapSize = audioObj.OverlapSize;
             this.Form = audioObj.Form;
             this.StretchFactor = audioObj.StretchFactor;
@@ -60,19 +61,21 @@ namespace OOCL.Shared
 
 		}
 
-		public override String ToString()
-        {
-            string info = $"AudioObjInfo: {this.Name} ({this.Id})\n" +
-                          $"Samplerate: {this.Samplerate}, Channels: {this.Channels}, Bitdepth: {this.Bitdepth}\n" +
-                          $"Length: {this.Lenght}, ChunkSize: {this.ChunkSize}, OverlapSize: {this.OverlapSize}\n" +
-                          $"Form: {this.Form}, StretchFactor: {this.StretchFactor}\n" +
-                          $"Playing: {this.Playing}, Volume: {this.Volume}\n" +
-                          $"Duration: {this.Duration}, CurrentTime: {this.CurrentTime}\n" +
-                          $"ErrorMessage: {this.ErrorMessage}";
-
-            return info;
+		public override string ToString()
+		{
+            return $"'{this.Name}' <{(this.Extension)}>" + "\n" +
+                $"({this.Id})" + "\n\n" +
+                $"{this.Samplerate} Hz, {this.Channels} ch., {this.Bitdepth} bits, {this.Lenght} samples" + "\n" +
+                $"{this.Bpm.ToString("F6")} BPM" + "\n" +
+				$"{this.Form}-Form, chunk size: {this.ChunkSize} ({this.OverlapSize} overlap), stretch factor: {this.StretchFactor.ToString("F6")}" + "\n\n" +
+                $"{this.PlaybackState}: {this.CurrentTime.ToString("F2")} sec. / {this.Duration.ToString("F2")} sec. (Vol.: {this.Volume}%)" + "\n\n" +
+                $"{this.SizeMb} MB as {this.DataType}{this.DataStructure} on {(this.OnHost ? "Host" : "OpenCL")}" + "\n" +
+                $"<{this.PointerHex}>" + "\n\n" +
+                $"Initially loaded within {this.LastLoadingTime.ToString("F3")} sec." + "\n" +
+                $"Last processing within {this.LastProcessingTime.ToString("F3")} sec." + "\n" +
+                $"{(string.IsNullOrEmpty(this.ErrorMessage) ? "No errors." : $"Error: {this.ErrorMessage}")}";
 		}
 
-        
-    }
+
+	}
 }

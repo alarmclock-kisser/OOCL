@@ -76,11 +76,9 @@
     private Guid selectedImageGuid = Guid.Empty;
     private ImageObjInfo selectedImageInfo => imageInfos.FirstOrDefault(info => info.Id == selectedImageGuid) ?? new ImageObjInfo(null);
 
-    private int shortenInfoLength = 0;
     public bool singleLineInfo { get; set; } = false;
     private string selectedInfoString => selectedImageInfo.ToString();
 
-    private string kernelError = string.Empty;
     private IEnumerable<OpenClKernelInfo> kernelInfos = [];
     private string kernelFilter { get; set; } = "mandelbrot";
     private string selectedKernelName = string.Empty;
@@ -138,20 +136,7 @@
             imageInfos = await ApiClient.GetImageInfos();
 
             // Get kernel infos
-            kernelError = string.Empty; // Reset error
-
-            var (success, message, kernels) =
-                await ApiClient.GetOpenClKernelInfos(kernelFilter);
-
-            if (!success)
-            {
-                kernelError = message;
-                kernelInfos = [];
-            }
-            else
-            {
-                kernelInfos = kernels;
-            }
+            kernelInfos = await ApiClient.GetOpenClKernelInfos(kernelFilter);
 
             StateHasChanged();
 
