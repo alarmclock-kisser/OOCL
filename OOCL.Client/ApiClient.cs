@@ -26,6 +26,21 @@ namespace OOCL.Client
 			this.internalClient = new InternalClient(baseUrl, this.httpClient);
 		}
 
+		// Get ApiConfig-Info
+		public async Task<ApiConfigInfo> GetApiConfig()
+		{
+			var task = this.internalClient.ConfigAsync();
+			try
+			{
+				return await task;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error retrieving API config: {ex.Message}");
+				return new ApiConfigInfo();
+			}
+		}
+
 		// OpenCL-Controls
 		public async Task<OpenClServiceInfo> GetOpenClServiceInfo()
 		{

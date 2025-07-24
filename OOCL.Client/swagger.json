@@ -1416,6 +1416,55 @@
 				}
 			}
 		},
+		"/api/OpenCl/config": {
+			"get": {
+				"tags": [
+					"OpenCl"
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiConfigInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiConfigInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiConfigInfo"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"text/plain": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiConfigInfo"
+								}
+							},
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiConfigInfo"
+								}
+							},
+							"text/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiConfigInfo"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/OpenCl/status": {
 			"get": {
 				"tags": [
@@ -1928,7 +1977,8 @@
 						"in": "path",
 						"required": true,
 						"schema": {
-							"type": "string"
+							"type": "string",
+							"default": ""
 						}
 					}
 				],
@@ -2551,6 +2601,52 @@
 	},
 	"components": {
 		"schemas": {
+			"ApiConfigInfo": {
+				"type": "object",
+				"properties": {
+					"serverName": {
+						"type": "string",
+						"nullable": true
+					},
+					"serverProtocol": {
+						"type": "string",
+						"nullable": true
+					},
+					"serverPort": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"serverUrl": {
+						"type": "string",
+						"nullable": true
+					},
+					"fqdn": {
+						"type": "string",
+						"nullable": true
+					},
+					"fqdN_fallback": {
+						"type": "string",
+						"nullable": true
+					},
+					"serverVersion": {
+						"type": "string",
+						"nullable": true
+					},
+					"serverDescription": {
+						"type": "string",
+						"nullable": true
+					},
+					"initializeDeviceId": {
+						"type": "integer",
+						"format": "int32"
+					},
+					"defaultDeviceName": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"additionalProperties": false
+			},
 			"AudioData": {
 				"type": "object",
 				"properties": {
@@ -2563,6 +2659,10 @@
 						"nullable": true
 					},
 					"filepath": {
+						"type": "string",
+						"nullable": true
+					},
+					"extension": {
 						"type": "string",
 						"nullable": true
 					},
@@ -2623,6 +2723,10 @@
 						"type": "string",
 						"nullable": true
 					},
+					"extension": {
+						"type": "string",
+						"nullable": true
+					},
 					"meta": {
 						"type": "string",
 						"nullable": true
@@ -2661,6 +2765,10 @@
 					"lenght": {
 						"type": "integer",
 						"format": "int32"
+					},
+					"bpm": {
+						"type": "number",
+						"format": "float"
 					},
 					"chunkSize": {
 						"type": "integer",
@@ -2709,10 +2817,6 @@
 					"errorMessage": {
 						"type": "string",
 						"nullable": true
-					},
-					"bpm": {
-						"type": "number",
-						"format": "float"
 					}
 				},
 				"additionalProperties": false
@@ -2729,6 +2833,10 @@
 						"nullable": true
 					},
 					"filepath": {
+						"type": "string",
+						"nullable": true
+					},
+					"extension": {
 						"type": "string",
 						"nullable": true
 					},
@@ -2786,6 +2894,10 @@
 						"nullable": true
 					},
 					"filepath": {
+						"type": "string",
+						"nullable": true
+					},
+					"extension": {
 						"type": "string",
 						"nullable": true
 					},
@@ -3206,10 +3318,6 @@
 						"items": {
 							"$ref": "#/components/schemas/PieChartData"
 						},
-						"nullable": true
-					},
-					"magnitude": {
-						"type": "string",
 						"nullable": true
 					}
 				},

@@ -4,6 +4,7 @@ using OOCL.Core.CommonStaticMethods;
 using TextCopy;
 using Microsoft.AspNetCore.Mvc;
 using OOCL.Core;
+using System.Reflection;
 
 
 namespace OOCL.Api
@@ -24,6 +25,36 @@ namespace OOCL.Api
 			int defaultWidth = builder.Configuration.GetValue<int>("DefaultImageWidth", 720);
 			int defaultHeight = builder.Configuration.GetValue<int>("DefaultImageHeight", 480);
 
+			// Server config
+			var serverConfig = builder.Configuration.GetSection("ServerConfig");
+			string serverName = serverConfig.GetValue<string>("ServerName") ?? Assembly.GetExecutingAssembly().GetName().Name ?? "OOCL.Api";
+			string serverProtocol = serverConfig.GetValue<string>("ServerProtocol") ?? "http";
+			int serverPort = serverConfig.GetValue<int>("ServerPort", 5555);
+			string serverUrl = serverConfig.GetValue<string>("ServerUrl") ?? (serverProtocol.ToLower().EndsWith('s') ? "https://localhost:" + serverPort : "http://localhost:" + serverPort);
+			string fqdn = serverConfig.GetValue<string>("FQDN") ?? "localhost";
+			string fqdnFallback = serverConfig.GetValue<string>("FQDN_fallback") ?? "localhost";
+			string serverVersion = serverConfig.GetValue<string>("ServerVersion") ?? "0.0.0";
+			string serverDescription = serverConfig.GetValue<string>("ServerDescription") ?? "OOCL API";
+			int initializeDeviceId = serverConfig.GetValue<int>("InitializeDeviceId", -1);
+			string defaultDeviceName = serverConfig.GetValue<string>("DefaultDeviceName") ?? "CPU";
+
+			// Build ApiConfig & add to DI container
+			var apiConfig = new ApiConfig
+			{
+				ServerName = serverName,
+				ServerProtocol = serverProtocol,
+				ServerPort = serverPort,
+				ServerUrl = serverUrl,
+				FQDN = fqdn,
+				FQDN_fallback = fqdnFallback,
+				ServerVersion = serverVersion,
+				ServerDescription = serverDescription,
+				InitializeDeviceId = initializeDeviceId,
+				DefaultDeviceName = defaultDeviceName
+			};
+			builder.Services.AddSingleton(apiConfig);
+
+
 			// Log retrieved settings on console
 			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ OOCL.Api \\ appsettings.json ~ ~ ~ ~ ~ User options: ~ ~ ~ ~ ~ ");
 			Console.WriteLine();
@@ -34,11 +65,25 @@ namespace OOCL.Api
 			{
 				Console.WriteLine("~ ~ ~ ~ ~ ~ ~: (Warning: This will wipe all media objects except for the most recent one!)");
 			}
+			Console.WriteLine($"~appsettings~: Spare workers set to {spareWorkers}. ['SpareWorkers'] = '{spareWorkers}'" +
+				$" (using {(CommonStatics.ActiveWorkers)} of max. {CommonStatics.MaxAvailableWorkers})");
 			Console.WriteLine($"~appsettings~: Default playback volume set to {defaultVolume}%. ['DefaultVolume'] = '{defaultVolume}'");
 			Console.WriteLine($"~appsettings~: Waveform FPS set to {waveformFps}. ['WaveformFps'] = '{waveformFps}'");
 			Console.WriteLine($"~appsettings~: Default image resolution set to {defaultWidth}x{defaultHeight} px. ['DefaultImageWidth'] = '{defaultWidth}', ['DefaultImageHeight'] = '{defaultHeight}'");
-			Console.WriteLine($"~appsettings~: Spare workers set to {spareWorkers}. ['SpareWorkers'] = '{spareWorkers}'" +
-				$" (using {(CommonStatics.ActiveWorkers)} of max. {CommonStatics.MaxAvailableWorkers})");
+			Console.WriteLine($"~appsettings~: Server name set to '{serverName}'. ['ServerName'] = '{serverName}'");
+			Console.WriteLine($"~appsettings~: Server protocol set to '{serverProtocol}'. ['ServerProtocol'] = '{serverProtocol}'");
+			Console.WriteLine($"~appsettings~: Server port set to {serverPort}. ['ServerPort'] = '{serverPort}'");
+			Console.WriteLine($"~appsettings~: Server URL set to '{serverUrl}'. ['ServerUrl'] = '{serverUrl}'");
+			Console.WriteLine($"~appsettings~: FQDN set to '{fqdn}'. ['FQDN'] = '{fqdn}'");
+			Console.WriteLine($"~appsettings~: FQDN fallback set to '{fqdnFallback}'. ['FQDN_fallback'] = '{fqdnFallback}'");
+			Console.WriteLine($"~appsettings~: Server version set to '{serverVersion}'. ['ServerVersion'] = '{serverVersion}'");
+			Console.WriteLine($"~appsettings~: Server description set to '{serverDescription}'. ['ServerDescription'] = '{serverDescription}'");
+			Console.WriteLine($"~appsettings~: Initialize device ID set to {initializeDeviceId}. ['InitializeDeviceId'] = '{initializeDeviceId}'");
+			if (initializeDeviceId < 0)
+			{
+				Console.WriteLine("~ ~ ~ ~ ~ ~ ~: (Warning: No device id is selected for initializing at startup!)");
+			}
+			Console.WriteLine($"~appsettings~: Default device name set to '{defaultDeviceName}'. ['DefaultDeviceName'] = '{defaultDeviceName}'");
 			Console.WriteLine();
 			Console.WriteLine($" ~ ~ ~ ~ ~ ~ ~ ~ User options END ~ ~ ~ ~ ~ ");
 
@@ -163,4 +208,18 @@ namespace OOCL.Api
 			app.Run();
         }
     }
+
+	public class ApiConfig
+	{
+		public string ServerName { get; set; } = string.Empty;
+		public string ServerProtocol { get; set; } = string.Empty;
+		public int ServerPort { get; set; } = 0;
+		public string ServerUrl { get; set; } = string.Empty;
+		public string FQDN { get; set; } = string.Empty;
+		public string FQDN_fallback { get; set; } = string.Empty;
+		public string ServerVersion { get; set; } = string.Empty;
+		public string ServerDescription { get; set; } = string.Empty;
+		public int InitializeDeviceId { get; set; } = -1;
+		public string DefaultDeviceName { get; set; } = string.Empty;
+	}
 }

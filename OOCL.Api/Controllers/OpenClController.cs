@@ -4,6 +4,7 @@ using OOCL.OpenCl;
 using OOCL.Shared;
 using Microsoft.AspNetCore.Mvc;
 using TextCopy;
+using OOCL.Shared.Models;
 
 namespace OOCL.Api.Controllers
 {
@@ -15,6 +16,10 @@ namespace OOCL.Api.Controllers
         private readonly ImageCollection imageCollection;
         private readonly AudioCollection audioCollection;
         private readonly IClipboard clipboard;
+
+		// ApiConfig pipethrough
+		public ApiConfig Config { get; }
+
 
 
 		private Task<OpenClServiceInfo> statusInfoTask =>
@@ -49,13 +54,62 @@ namespace OOCL.Api.Controllers
 		public bool FlagReadable { get; set; } = false;
 
 
-		public OpenClController(OpenClService openClService, ImageCollection imageCollection, AudioCollection audioCollection, IClipboard clipboard)
+		public OpenClController(OpenClService openClService, ImageCollection imageCollection, AudioCollection audioCollection, IClipboard clipboard, ApiConfig apiConfig)
         {
             this.openClService = openClService;
             this.imageCollection = imageCollection;
             this.audioCollection = audioCollection;
             this.clipboard = clipboard;
-        }
+
+			this.Config = apiConfig;
+
+			// Apply configuration settings: Initialize device
+			this.openClService.Initialize(apiConfig.InitializeDeviceId);
+			if (this.openClService.Online == false)
+			{
+				Console.WriteLine($"Error initializing Config's device by ID: {this.Config.InitializeDeviceId}");
+			}
+
+		}
+
+		// Endpoint to reflect the ApiConfig
+		[HttpGet("config")]
+		[ProducesResponseType(typeof(ApiConfigInfo), 200)]
+		[ProducesResponseType(typeof(ApiConfigInfo), 500)]
+		public ActionResult<ApiConfig> GetConfig()
+		{
+			var info = new ApiConfigInfo();
+			try
+			{
+				info = new ApiConfigInfo
+				{
+					ServerName = this.Config.ServerName,
+					ServerProtocol = this.Config.ServerProtocol,
+					ServerPort = this.Config.ServerPort,
+					ServerUrl = this.Config.ServerUrl,
+					FQDN = this.Config.FQDN,
+					FQDN_fallback = this.Config.FQDN_fallback,
+					ServerVersion = this.Config.ServerVersion,
+					ServerDescription = this.Config.ServerDescription,
+					InitializeDeviceId = this.Config.InitializeDeviceId,
+					DefaultDeviceName = this.Config.DefaultDeviceName
+				};
+				return this.Ok(info);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("No ApiConfig available (!)");
+
+				var error = new ProblemDetails
+				{
+					Title = "Error retrieving configuration",
+					Detail = ex.Message,
+					Status = 500
+				};
+
+				return this.Ok(info);
+			}
+		}
 
 		[HttpGet("status")]
 		[ProducesResponseType(typeof(OpenClServiceInfo), 200)]
@@ -279,7 +333,7 @@ namespace OOCL.Api.Controllers
 					if (allowTempSession)
 					{
 						int count = this.openClService.DeviceCount;
-						await Task.Run(() => this.openClService.Initialize(count - 1));
+						await Task.Run(() => this.openClService.Initialize(this.Config.DefaultDeviceName));
 						temp = true;
 					}
 
@@ -386,7 +440,7 @@ namespace OOCL.Api.Controllers
 					if (allowTempSession)
 					{
 						int count = this.openClService.DeviceCount;
-						await Task.Run(() => this.openClService.Initialize(count - 1));
+						await Task.Run(() => this.openClService.Initialize(this.Config.DefaultDeviceName));
 						temp = true;
 					}
 
