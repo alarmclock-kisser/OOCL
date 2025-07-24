@@ -14,7 +14,7 @@ namespace OOCL.Shared.Models
 		public string Name { get; set; }= string.Empty;
 		public string Type { get; set; }= "OpenCL Object";
 		public bool Online { get; set; }= false;
-		public string Status { get; set; }= "FICK DEINE ABGEFACKTE DRECKS-MUTTER !!!";
+		public string Status { get; set; }= string.Empty;
 		public string Meta { get; set; }= string.Empty;
 		public IEnumerable<string> ErrorMessages { get; set; }= [];
 		protected DateTime createdAt = DateTime.Now;
