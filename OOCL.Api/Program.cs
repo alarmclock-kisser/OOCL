@@ -100,8 +100,6 @@ namespace OOCL.Api
 
 			// Add services to the container.
 			builder.Services.AddSingleton<OOCL.OpenCl.OpenClService>();
-			// Here please add the AudioCollection as Singleton with the SaveMemory option (Set fielt to saveMemory)
-			// Correct the syntax for adding AudioCollection as a singleton service
 			builder.Services.AddSingleton<OOCL.Core.AudioCollection>(provider =>
 				new OOCL.Core.AudioCollection
 				{
@@ -149,10 +147,14 @@ namespace OOCL.Api
 				});
 			}
 
-			// Request Body Size Limits
-			builder.WebHost.ConfigureKestrel(options =>
-			{
-				options.Limits.MaxRequestBodySize = maxUploadSize;
+			// Ändere die Kestrel-Konfiguration:
+			builder.WebHost.ConfigureKestrel(serverOptions => {
+				serverOptions.Limits.MaxRequestBodySize = maxUploadSize;
+
+				// HTTPS erzwingen
+				serverOptions.ConfigureHttpsDefaults(httpsOptions => {
+					httpsOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+				});
 			});
 
 			builder.Services.Configure<IISServerOptions>(options =>
