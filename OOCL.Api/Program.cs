@@ -143,7 +143,7 @@ namespace OOCL.Api
 						Contact = new OpenApiContact { Name = "Developer", Email = "marcel.king91299@gmail.com" }
 					});
 
-					c.AddServer(new OpenApiServer { Url = "https://localhost:7171" });
+					c.AddServer(new OpenApiServer { Url = apiConfig.ServerUrl });
 					c.DocInclusionPredicate((_, api) => !string.IsNullOrWhiteSpace(api.GroupName));
 					c.TagActionsBy(api => [api.GroupName ?? "Default"]);
 				});

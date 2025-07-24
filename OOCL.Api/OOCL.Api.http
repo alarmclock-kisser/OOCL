@@ -1,6 +1,6 @@
-@OOCL.Api_HostAddress = http://localhost:5259
+@OOCL.Api_HostAddress = http://localhost:5252
 
-GET {{OOCL.Api_HostAddress}}/weatherforecast/
+GET {{OOCL.Api_HostAddress}}/opencl/status
 Accept: application/json
 
 ###

@@ -9,7 +9,7 @@ namespace OOCL.WebApp
 		{
 			var builder = WebApplication.CreateBuilder(args);
 
-			string? apiBaseUrl = builder.Configuration.GetValue<string>("ApiUrlHttps") ?? builder.Configuration.GetValue<string>("ApiUrlHttp");
+			string? apiBaseUrl = builder.Configuration.GetValue<string>("ApiUrlHttps") ?? builder.Configuration.GetValue<string>("ApiUrlHttp") ?? "https://localhost:7171";
 			if (string.IsNullOrEmpty(apiBaseUrl))
 			{
 				throw new InvalidOperationException("'" + apiBaseUrl + "' is not configured. Please set the ApiBaseUrl configuration in appsettings.json or environment variables.");
