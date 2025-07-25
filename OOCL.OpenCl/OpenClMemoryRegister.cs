@@ -121,7 +121,8 @@ namespace OOCL.OpenCl
 			this.Repopath = repopath;
 
 			// Set logger
-			
+			this.logger = logger;
+
 
 			this.CTX = context;
 			this.DEV = device;
@@ -136,7 +137,7 @@ namespace OOCL.OpenCl
 			}
 
 			// Test + success Log()
-			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
+			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LoggingDirectory), 0);
 		}
 
 
