@@ -44,16 +44,15 @@ namespace OOCL.OpenCl
 		private CLKernel? Kernel => this.KernelCompiler?.Kernel;
 		public string KernelFile => this.KernelCompiler?.KernelFile ?? string.Empty;
 
-		// Log4net path
+		// Logger
 		public bool EnableLogging { get; set; } = true;
-		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Executioner");
-
+		private RollingFileLogger logger;
 
 		// ----- ----- -----  CONSTRUCTOR ----- ----- ----- \\
-		public OpenClKernelExecutioner(string repopath, OpenClMemoryRegister memR, CLContext context, CLDevice device, CLPlatform platform, CLCommandQueue queue, OpenClKernelCompiler compiler)
+		public OpenClKernelExecutioner(string repopath, OpenClMemoryRegister memR, CLContext context, CLDevice device, CLPlatform platform, CLCommandQueue queue, OpenClKernelCompiler compiler, RollingFileLogger logger)
 		{
 			this.Repopath = repopath;
+			this.logger = logger;
 
 			this.MemoryRegister = memR;
 			this.CTX = context;
@@ -61,9 +60,6 @@ namespace OOCL.OpenCl
 			this.PLAT = platform;
 			this.QUE = queue;
 			this.KernelCompiler = compiler;
-
-			// Test + success Log()
-			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
 		}
 
 

@@ -103,9 +103,9 @@ namespace OOCL.Api
 
 			// Add services to the container.
 			// Replace the incorrect line with a valid service registration
-			builder.Services.AddSingleton<OOCL.Shared.RollingFileLogger>(provider =>
+			builder.Services.AddSingleton<OOCL.Core.RollingFileLogger>(provider =>
 			{
-				return new OOCL.Shared.RollingFileLogger(clearPreviousLogs);
+				return new OOCL.Core.RollingFileLogger(clearPreviousLogs);
 			});
 			builder.Services.AddSingleton<OOCL.OpenCl.OpenClService>();
 			builder.Services.AddSingleton<OOCL.Core.AudioCollection>(provider =>

@@ -12,11 +12,14 @@ namespace OOCL.Api.Controllers
 	{
 		private readonly AudioCollection audioCollection;
 		private readonly IClipboard clipboard;
+		private readonly RollingFileLogger logger;
 
-		public AudioController(AudioCollection audioCollection, IClipboard clipboard)
+		public AudioController(AudioCollection audioCollection, IClipboard clipboard, RollingFileLogger logger)
 		{
+			this.logger = logger;
 			this.audioCollection = audioCollection;
 			this.clipboard = clipboard;
+
 		}
 
 		[HttpGet("audios")]

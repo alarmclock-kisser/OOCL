@@ -16,6 +16,7 @@ namespace OOCL.Api.Controllers
         private readonly ImageCollection imageCollection;
         private readonly AudioCollection audioCollection;
         private readonly IClipboard clipboard;
+		private readonly RollingFileLogger logger;
 
 		// ApiConfig pipethrough
 		public ApiConfig Config { get; }
@@ -54,9 +55,10 @@ namespace OOCL.Api.Controllers
 		public bool FlagReadable { get; set; } = false;
 
 
-		public OpenClController(OpenClService openClService, ImageCollection imageCollection, AudioCollection audioCollection, IClipboard clipboard, ApiConfig apiConfig)
+		public OpenClController(OpenClService openClService, ImageCollection imageCollection, AudioCollection audioCollection, IClipboard clipboard, ApiConfig apiConfig, RollingFileLogger logger)
         {
-            this.openClService = openClService;
+			this.logger = logger;
+			this.openClService = openClService;
             this.imageCollection = imageCollection;
             this.audioCollection = audioCollection;
             this.clipboard = clipboard;

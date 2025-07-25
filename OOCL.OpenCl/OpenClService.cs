@@ -9,6 +9,9 @@ namespace OOCL.OpenCl
 {
 	public class OpenClService : IOpenClObj
 	{
+		// RollingFileLogger is already available as a DI service (OOCL.Core.RollingFileLogger)
+		private RollingFileLogger logger;
+
 		// INTERFACE
 		public string Name
 		{
@@ -31,6 +34,14 @@ namespace OOCL.OpenCl
 
 		public string Repopath => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "OOCL.OpenCl"));
 
+
+		public OpenClService(RollingFileLogger logger)
+		{
+			this.logger = logger;
+
+			// Set logging true
+			this.EnableLogging = true;
+		}
 
 		private Dictionary<CLDevice, CLPlatform> Devices => this.GetDevices();
 		public int DeviceCount => this.Devices.Count;
@@ -84,9 +95,6 @@ namespace OOCL.OpenCl
 				}
 			}
 		}
-		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-
-		// Log4net logger with config ('log4net.config' at root of project)
 		
 
 
@@ -107,9 +115,6 @@ namespace OOCL.OpenCl
 
 		// Options
 		public string PreferredDeviceName { get; set; } = string.Empty;
-
-		// Logger
-		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Service");
 
 		// Status
 		public string GetStatus()
@@ -181,7 +186,8 @@ namespace OOCL.OpenCl
 				return; // Logging is disabled
 			}
 
-			this.logger.Log(msg);
+			// Log to RollingFileLogger
+			this.logger.Log(this.GetType(), msg, inner, indent).ConfigureAwait(false).GetAwaiter().GetResult();
 		}
 
 

@@ -12,9 +12,11 @@ namespace OOCL.Api.Controllers
 	{
 		private readonly ImageCollection imageCollection;
 		private readonly IClipboard clipboard;
+		private readonly RollingFileLogger logger;
 
-		public ImageController(ImageCollection imageCollection, IClipboard clipboard)
+		public ImageController(ImageCollection imageCollection, IClipboard clipboard, RollingFileLogger logger)
 		{
+			this.logger = logger;
 			this.imageCollection = imageCollection;
 			this.clipboard = clipboard;
 		}

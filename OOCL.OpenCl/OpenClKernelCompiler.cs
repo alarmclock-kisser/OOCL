@@ -118,17 +118,17 @@ namespace OOCL.OpenCl
 		public IEnumerable<string> ArgumentNames => this.Arguments.Keys;
 		public IEnumerable<string> ArgumentTypes => this.Arguments.Values.Select(t => t.Name);
 
-		// Log4net path
+		// Logging
 		public bool EnableLogging { get; set; } = true;
-		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Compiler");
+		private RollingFileLogger logger;
 
 
 		// ----- ----- ----- CONSTRUCTORS ----- ----- ----- \\
-		public OpenClKernelCompiler(string repopath, OpenClMemoryRegister memoryRegister, CLContext ctx, CLDevice dev, CLPlatform plat, CLCommandQueue que)
+		public OpenClKernelCompiler(string repopath, OpenClMemoryRegister memoryRegister, CLContext ctx, CLDevice dev, CLPlatform plat, CLCommandQueue que, RollingFileLogger logger)
 		{
 			// Set attributes
 			this.Repopath = repopath;
+			this.logger = logger;
 
 			this.MemoryRegister = memoryRegister;
 			this.CTX = ctx;
@@ -137,9 +137,6 @@ namespace OOCL.OpenCl
 			this.QUE = que;
 
 			this.PrecompileAllKernels(this.PrecompileAndCache);
-
-			// Test + success Log()
-			this.Log(this.Name + " initialized.", "Log at: " + Path.GetFullPath(this.logger.LogPath), 0);
 		}
 
 

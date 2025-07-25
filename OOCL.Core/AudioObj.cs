@@ -432,7 +432,10 @@ namespace OOCL.Core
 					for (int j = 0; j < Math.Min(chunkSize, chunk.Length); j++)
 					{
 						int idx = offset + j;
-						if (idx >= outputLength) break;
+						if (idx >= outputLength)
+						{
+							break;
+						}
 
 						double windowedSample = chunk[j] * window[j];
 
@@ -472,7 +475,9 @@ namespace OOCL.Core
 			this.Player?.Dispose();
 
 			if (this.Data == null || this.Data.Length == 0)
+			{
 				return;
+			}
 
 			try
 			{

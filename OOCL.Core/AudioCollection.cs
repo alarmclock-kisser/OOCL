@@ -209,7 +209,10 @@ namespace OOCL.Core
 
 			lock (this._tracks)
 			{
-				if (index < 0 || index >= this._tracks.Count) return;
+				if (index < 0 || index >= this._tracks.Count)
+				{
+					return;
+				}
 
 				toRemove = this._tracks[index];
 				this._tracks.RemoveAt(index);
@@ -231,7 +234,10 @@ namespace OOCL.Core
 
 		public async Task TogglePlayback(float volume = 1.0f)
 		{
-			if (this.CurrentTrack == null || this.CurrentTrack.Data.Length == 0) return;
+			if (this.CurrentTrack == null || this.CurrentTrack.Data.Length == 0)
+			{
+				return;
+			}
 
 			if (this.CurrentTrack.Playing)
 			{

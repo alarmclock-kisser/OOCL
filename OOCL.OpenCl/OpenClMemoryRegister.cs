@@ -103,8 +103,6 @@ namespace OOCL.OpenCl
 
 		// Log4net path
 		public bool EnableLogging { get; set; } = true;
-		public string logPath => this.Repopath + "/_Logs/" + (this.GetType().Name ?? this.Type) + ".log";
-		private FileLogger logger { get; init; } = new FileLogger("OpenCL-Register");
 
 
 		// ----- ----- ----- ATTRIBUTES ----- ----- ----- \\
@@ -114,11 +112,11 @@ namespace OOCL.OpenCl
 		private readonly object _memoryLock = new();
 		private ConcurrentDictionary<Guid, ClMem> memory = [];
 
-
+		private RollingFileLogger logger;
 
 
 		// ----- ----- ----- CONSTRUCTORS ----- ----- ----- \\
-		public OpenClMemoryRegister(string repopath, CLContext context, CLDevice device, CLPlatform platform)
+		public OpenClMemoryRegister(string repopath, CLContext context, CLDevice device, CLPlatform platform, RollingFileLogger logger)
 		{
 			this.Repopath = repopath;
 
@@ -162,7 +160,8 @@ namespace OOCL.OpenCl
 				return; // Logging is disabled
 			}
 
-			this.logger.Log(msg);
+			// Log to RollingFileLogger
+			this.logger.Log(this.GetType(), msg, inner, indent).ConfigureAwait(false).GetAwaiter().GetResult();
 		}
 
 		// Dispose
