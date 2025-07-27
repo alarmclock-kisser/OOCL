@@ -210,7 +210,7 @@ namespace OOCL.Api.Controllers
 				}
 
 				if (copyGuid) await this.clipboard.SetTextAsync(info.Id.ToString());
-				return this.Created($"api/images/{info.Id}/info", info);
+				return this.Created($"api/image/{info.Id}/info", info);
 			}
 			catch (Exception ex)
 			{
@@ -234,10 +234,10 @@ namespace OOCL.Api.Controllers
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
-		public async Task<IActionResult> DownloadImage(Guid guid, string format = "bmp")
+		public async Task<IActionResult> DownloadImage(Guid guid, string format = "png")
 		{
 			var allowedFormats = new[] { "bmp", "png", "jpg" };
-			format = allowedFormats.Contains(format?.ToLower() ?? string.Empty) ? format ?? "bmp" : "bmp";
+			format = allowedFormats.Contains(format?.ToLower() ?? string.Empty) ? format ?? "png" : "png";
 
 			try
 			{
@@ -281,10 +281,10 @@ namespace OOCL.Api.Controllers
 		[ProducesResponseType(typeof(ImageData), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
-		public async Task<ActionResult<ImageData>> GetBase64(Guid guid, string format = "bmp")
+		public async Task<ActionResult<ImageData>> GetBase64(Guid guid, string format = "png")
 		{
 			var allowedFormats = new[] { "bmp", "png", "jpg" };
-			format = allowedFormats.Contains(format?.ToLower() ?? string.Empty) ? format ?? "bmp" : "bmp";
+			format = allowedFormats.Contains(format?.ToLower() ?? string.Empty) ? format ?? "png" : "bmp";
 
 			try
 			{
