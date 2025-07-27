@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_Logs\**" />
+    <EmbeddedResource Remove="_Logs\**" />
+    <None Remove="_Logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="OpenTK" Version="4.9.4" />
     <PackageReference Include="OpenTK.Mathematics" Version="4.9.4" />
   </ItemGroup>
@@ -34,10 +40,6 @@
     <None Update="Kernels\Image\OnlyEdges00.cl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="_Logs\" />
   </ItemGroup>
 
 </Project>

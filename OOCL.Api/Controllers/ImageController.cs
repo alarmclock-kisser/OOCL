@@ -43,7 +43,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("images/{guid}/info")]
+		[HttpGet("{guid}/info")]
 		[ProducesResponseType(typeof(ImageObjInfo), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageObjInfo>> GetImageInfo(Guid guid)
@@ -64,7 +64,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpDelete("images/{guid}/remove")]
+		[HttpDelete("{guid}/remove")]
 		[ProducesResponseType(typeof(bool), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -108,7 +108,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("images/empty/{width}/{height}")]
+		[HttpPost("empty/{width}/{height}")]
 		[ProducesResponseType(typeof(ImageObjInfo), 201)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
@@ -152,7 +152,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("images/upload")]
+		[HttpPost("upload")]
 		[RequestSizeLimit(256_000_000)]
 		[ProducesResponseType(typeof(ImageObjInfo), 201)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -229,13 +229,16 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("images/{guid}/download/{format}")]
+		[HttpGet("download/{guid}/{format?}")]
 		[ProducesResponseType(typeof(FileResult), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<IActionResult> DownloadImage(Guid guid, string format = "bmp")
 		{
+			var allowedFormats = new[] { "bmp", "png", "jpg" };
+			format = allowedFormats.Contains(format?.ToLower() ?? string.Empty) ? format ?? "bmp" : "bmp";
+
 			try
 			{
 				var obj = this.imageCollection[guid];
@@ -274,12 +277,15 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("images/{guid}/image64/{format}")]
+		[HttpGet("{guid}/image64/{format?}")]
 		[ProducesResponseType(typeof(ImageData), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<ImageData>> GetBase64(Guid guid, string format = "bmp")
 		{
+			var allowedFormats = new[] { "bmp", "png", "jpg" };
+			format = allowedFormats.Contains(format?.ToLower() ?? string.Empty) ? format ?? "bmp" : "bmp";
+
 			try
 			{
 				var obj = this.imageCollection[guid];

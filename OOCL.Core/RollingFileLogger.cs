@@ -84,6 +84,12 @@ namespace OOCL.Core
 			return projectsAndClasses;
 		}
 
+		private static string SanitizeFileName(string name)
+		{
+			var invalidChars = Path.GetInvalidFileNameChars();
+			return string.Concat(name.Where(c => !invalidChars.Contains(c)));
+		}
+
 		private List<string> GetLogFiles(bool clearPrevious = false)
 		{
 			if (clearPrevious)
@@ -101,7 +107,9 @@ namespace OOCL.Core
 			{
 				foreach (var className in project.Value)
 				{
-					var fileName = $"{project.Key}.{className}{this.FileExtension}";
+					var safeProject = SanitizeFileName(project.Key);
+					var safeClass = SanitizeFileName(className);
+					var fileName = $"{safeProject}.{safeClass}{this.FileExtension}";
 					var fullPath = Path.Combine(this.LoggingDirectory, fileName);
 					logFiles.Add(fullPath);
 					if (!File.Exists(fullPath))
@@ -126,10 +134,13 @@ namespace OOCL.Core
 			{
 				this.projectsAndClasses[projectName].Add(className);
 			}
-			var logFilePath = Path.Combine(this.LoggingDirectory, $"{projectName}.{className}{this.FileExtension}");
+			var safeProject = SanitizeFileName(projectName);
+			var safeClass = SanitizeFileName(className);
+			var logFilePath = Path.Combine(this.LoggingDirectory, $"{safeProject}.{safeClass}{this.FileExtension}");
 			var timeStamp = this.GetFormattedTime(this.TimeStampFormat);
 			var indentString = new string(this.IndentChar, indent * this.IndentWidth);
 			var logMessage = $"[{timeStamp}]: {projectName}.{className} : :  {indentString} '{message.TrimEnd(['.', '!', '?'])}'. {(string.IsNullOrEmpty(inner) ? "" : $"('{inner.TrimEnd(['.', '!', '?'])}'.)")}";
+
 			await File.AppendAllTextAsync(logFilePath, logMessage + Environment.NewLine);
 
 			// Ensure the log file does not exceed MaxLines

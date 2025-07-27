@@ -27,8 +27,7 @@ namespace OOCL.WebApp
 			// Add ApiClient (ctor string is the base URL)
 			builder.Services.AddHttpClient<OOCL.Client.ApiClient>(client =>
 			{
-				client.BaseAddress = new Uri(apiBaseUrl);
-				// client.DefaultRequestHeaders.Add("Accept", "application/json");
+				client.BaseAddress = new Uri("https://api.oocl.work");
 			});
 
 			// BUILD

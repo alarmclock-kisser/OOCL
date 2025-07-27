@@ -7,13 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OOCL.Core\OOCL.Core.csproj" />
-    <ProjectReference Include="..\OOCL.OpenCl\OOCL.OpenCl.csproj" />
+    <Compile Remove="Models\Logging\**" />
+    <Compile Remove="Ressources\**" />
+    <EmbeddedResource Remove="Models\Logging\**" />
+    <EmbeddedResource Remove="Ressources\**" />
+    <None Remove="Models\Logging\**" />
+    <None Remove="Ressources\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Logging\" />
-    <Folder Include="Ressources\" />
+    <ProjectReference Include="..\OOCL.Core\OOCL.Core.csproj" />
+    <ProjectReference Include="..\OOCL.OpenCl\OOCL.OpenCl.csproj" />
   </ItemGroup>
 
 </Project>

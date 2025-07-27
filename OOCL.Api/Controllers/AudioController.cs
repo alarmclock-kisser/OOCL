@@ -44,7 +44,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("audios/{guid}/info")]
+		[HttpGet("{guid}/info")]
 		[ProducesResponseType(typeof(AudioObjInfo), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<ActionResult<AudioObjInfo>> GetAudioInfo(Guid guid)
@@ -69,7 +69,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpDelete("audios/{guid}/remove")]
+		[HttpDelete("{guid}/remove")]
 		[ProducesResponseType(typeof(bool), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -116,13 +116,13 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("audios/upload")]
-		[RequestSizeLimit(512_000_000)]
+		[HttpPost("upload")]
+		[RequestSizeLimit(128_000_000)]
 		[ProducesResponseType(typeof(AudioObjInfo), 201)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
-		public async Task<ActionResult<AudioObjInfo>> UploadAudio(IFormFile file, bool copyGuid = true)
+		public async Task<ActionResult<AudioObjInfo>> UploadAudio(IFormFile file, bool copyGuid = false)
 		{
 			if (file.Length == 0)
 			{
@@ -173,7 +173,7 @@ namespace OOCL.Api.Controllers
 				}
 
 				if (copyGuid) this.clipboard.SetText(info.Id.ToString());
-				return this.Created($"api/audio/audios/{info.Id}/info", info);
+				return this.Created($"api/audio/{info.Id}/info", info);
 			}
 			catch (Exception ex)
 			{
@@ -192,7 +192,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("audios/{guid}/download")]
+		[HttpGet("{guid}/download")]
 		[ProducesResponseType(typeof(FileResult), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -248,7 +248,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("audios/{guid}/waveform64")]
+		[HttpGet("{guid}/waveform64")]
 		[ProducesResponseType(typeof(AudioData), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
@@ -286,7 +286,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("audios/{guid}/play/{volume}")]
+		[HttpPost("{guid}/play/{volume}")]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]
 		public async Task<IActionResult> PlayAudio(Guid guid, float volume = 0.66f)
@@ -320,7 +320,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("audios/{guid}/stop")]
+		[HttpPost("{guid}/stop")]
 		[ProducesResponseType(typeof(AudioObjInfo), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -366,7 +366,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("audios/stopAll")]
+		[HttpPost("stopAll")]
 		[ProducesResponseType(typeof(int), 200)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
 		[ProducesResponseType(typeof(ProblemDetails), 500)]

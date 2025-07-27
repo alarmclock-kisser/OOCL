@@ -167,7 +167,7 @@ namespace OOCL.OpenCl
 				return; // Logging is disabled
 			}
 
-			this.logger.Log(msg);
+this.logger.Log(this.GetType(), msg, inner, indent).GetAwaiter().GetResult();
 		}
 
 		// Dispose
