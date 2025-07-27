@@ -32,7 +32,7 @@ namespace OOCL.OpenCl
 		public IEnumerable<string> ErrorMessages { get; private set; } = [];
 		// -----
 
-		public string Repopath => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "OOCL.OpenCl"));
+		public string Repopath => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".."));
 
 
 		public OpenClService(RollingFileLogger logger)

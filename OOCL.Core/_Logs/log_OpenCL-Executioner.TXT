@@ -1,5 +1,0 @@
- ~~~ ~~~ ~~~ Log created for 'OpenCL-Executioner' at [2025-07-24 10:34:27.119] ~~~ ~~~ ~~~ 
-
-
-
-[2025-07-24 10:34:27.120] [Exec]: OpenCL Service initialized. (Log at: D:\REPOS\OOCL\OOCL.OpenCl/_Logs/OpenClKernelExecutioner.log)
