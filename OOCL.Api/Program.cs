@@ -95,7 +95,7 @@ namespace OOCL.Api
 			{
 				options.AddPolicy("BlazorCors", policy =>
 				{
-					policy.WithOrigins("https://localhost:7172")
+					policy.WithOrigins("https://www.oocl.work:7172")
 						  .AllowAnyHeader()
 						  .AllowAnyMethod();
 				});
@@ -120,8 +120,8 @@ namespace OOCL.Api
 			new OOCL.Core.ImageCollection
 				{
 					SaveMemory = saveMemory,
-					DefaultWidth = 720,
-					DefaultHeight = 480
+					DefaultWidth = defaultWidth,
+					DefaultHeight = defaultHeight
 				});
 
 			builder.Services.InjectClipboard();

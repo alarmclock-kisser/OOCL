@@ -1,7 +1,0 @@
- ~~~ ~~~ ~~~ Log created for 'OpenCL-Compiler' at [2025-07-24 10:34:26.442] ~~~ ~~~ ~~~ 
-
-
-
-[2025-07-24 10:34:27.117] [Kernel]: No kernel to unload.
-
-[2025-07-24 10:34:27.118] [Kernel]: OpenCL Service initialized. (Log at: D:\REPOS\OOCL\OOCL.OpenCl/_Logs/OpenClKernelCompiler.log)

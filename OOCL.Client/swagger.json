@@ -63,7 +63,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/{guid}/info": {
+		"/api/Audio/{guid}/info": {
 			"get": {
 				"tags": [
 					"Audio"
@@ -123,7 +123,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/{guid}/remove": {
+		"/api/Audio/{guid}/remove": {
 			"delete": {
 				"tags": [
 					"Audio"
@@ -223,7 +223,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/upload": {
+		"/api/Audio/upload": {
 			"post": {
 				"tags": [
 					"Audio"
@@ -234,7 +234,7 @@
 						"in": "query",
 						"schema": {
 							"type": "boolean",
-							"default": true
+							"default": false
 						}
 					}
 				],
@@ -342,7 +342,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/{guid}/download": {
+		"/api/Audio/{guid}/download": {
 			"get": {
 				"tags": [
 					"Audio"
@@ -445,7 +445,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/{guid}/waveform64": {
+		"/api/Audio/{guid}/waveform64": {
 			"get": {
 				"tags": [
 					"Audio"
@@ -525,7 +525,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/{guid}/play/{volume}": {
+		"/api/Audio/{guid}/play/{volume}": {
 			"post": {
 				"tags": [
 					"Audio"
@@ -595,7 +595,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/{guid}/stop": {
+		"/api/Audio/{guid}/stop": {
 			"post": {
 				"tags": [
 					"Audio"
@@ -695,7 +695,7 @@
 				}
 			}
 		},
-		"/api/Audio/audios/stopAll": {
+		"/api/Audio/stopAll": {
 			"post": {
 				"tags": [
 					"Audio"
@@ -825,7 +825,7 @@
 				}
 			}
 		},
-		"/api/Image/images/{guid}/info": {
+		"/api/Image/{guid}/info": {
 			"get": {
 				"tags": [
 					"Image"
@@ -885,7 +885,7 @@
 				}
 			}
 		},
-		"/api/Image/images/{guid}/remove": {
+		"/api/Image/{guid}/remove": {
 			"delete": {
 				"tags": [
 					"Image"
@@ -985,7 +985,7 @@
 				}
 			}
 		},
-		"/api/Image/images/empty/{width}/{height}": {
+		"/api/Image/empty/{width}/{height}": {
 			"post": {
 				"tags": [
 					"Image"
@@ -1096,7 +1096,7 @@
 				}
 			}
 		},
-		"/api/Image/images/upload": {
+		"/api/Image/upload": {
 			"post": {
 				"tags": [
 					"Image"
@@ -1215,7 +1215,7 @@
 				}
 			}
 		},
-		"/api/Image/images/{guid}/download/{format}": {
+		"/api/Image/download/{guid}/{format}": {
 			"get": {
 				"tags": [
 					"Image"
@@ -1327,7 +1327,7 @@
 				}
 			}
 		},
-		"/api/Image/images/{guid}/image64/{format}": {
+		"/api/Image/{guid}/image64/{format}": {
 			"get": {
 				"tags": [
 					"Image"

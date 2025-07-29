@@ -23,5 +23,15 @@
         "DebugTarget": "https"
       }
     ]
+  },
+  {
+    "Name": "https WebApp",
+    "Projects": [
+      {
+        "Path": "OOCL.WebApp\\OOCL.WebApp.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      }
+    ]
   }
 ]

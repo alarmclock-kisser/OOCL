@@ -192,7 +192,7 @@
             try
             {
                 // Direkt die URL zum API-Endpunkt aufrufen
-                string downloadUrl = $"{ApiConfig.Url}/api/image/images/{selectedImageInfo.Id}/download/{selectedFormat}";
+                string downloadUrl = $"{ApiConfig.Url}/api/image/{selectedImageInfo.Id}/download/{selectedFormat}";
 
                 // Rufe die JavaScript-Funktion auf, um den Download zu starten
                 await JSRuntime.InvokeVoidAsync("downloadFileFromUrl", downloadUrl, $"{fileName}.{selectedFormat}");

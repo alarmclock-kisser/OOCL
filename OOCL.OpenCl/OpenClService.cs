@@ -32,7 +32,7 @@ namespace OOCL.OpenCl
 		public IEnumerable<string> ErrorMessages { get; private set; } = [];
 		// -----
 
-		public string Repopath => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "OOCL.OpenCl"));
+		public string Repopath => Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory));
 
 
 		public OpenClService(RollingFileLogger logger)
@@ -888,9 +888,9 @@ namespace OOCL.OpenCl
 				return;
 			}
 			// Assuming CLCommandQueue is created within OpenClMemoryRegister constructor
-			this.MemoryRegister = new OpenClMemoryRegister(this.Repopath, this.CTX.Value, this.DEV.Value, this.PLAT.Value);
-			this.KernelCompiler = new OpenClKernelCompiler(this.Repopath, this.MemoryRegister, this.CTX.Value, this.DEV.Value, this.PLAT.Value, this.MemoryRegister.Queue);
-			this.KernelExecutioner = new OpenClKernelExecutioner(this.Repopath, this.MemoryRegister, this.CTX.Value, this.DEV.Value, this.PLAT.Value, this.MemoryRegister.Queue, this.KernelCompiler);
+			this.MemoryRegister = new OpenClMemoryRegister(this.Repopath, this.CTX.Value, this.DEV.Value, this.PLAT.Value, this.logger);
+			this.KernelCompiler = new OpenClKernelCompiler(this.Repopath, this.MemoryRegister, this.CTX.Value, this.DEV.Value, this.PLAT.Value, this.MemoryRegister.Queue, this.logger);
+			this.KernelExecutioner = new OpenClKernelExecutioner(this.Repopath, this.MemoryRegister, this.CTX.Value, this.DEV.Value, this.PLAT.Value, this.MemoryRegister.Queue, this.KernelCompiler, this.logger);
 
 			this.Index = index;
 

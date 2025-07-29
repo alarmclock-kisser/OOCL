@@ -32,7 +32,7 @@ namespace OOCL.Api.Controllers
                 return this.openClService.GetDevices().Select((device, index) => new OpenClDeviceInfo(this.openClService, index));
             });
 
-		public string sizeMagnitude { get; set; } = "KB";
+		public string sizeMagnitude { get; set; } = "MB";
 		private Task<OpenClUsageInfo> usageInfoTask =>
             Task.Run(() => new OpenClUsageInfo(this.openClService.MemoryRegister, this.sizeMagnitude));
 
@@ -155,7 +155,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpPost("devices/{deviceId}/initialize")]
+		[HttpPost("initialize/{deviceId}")]
 		[ProducesResponseType(typeof(OpenClServiceInfo), 201)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -291,7 +291,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("kernels/{filter}")]
+		[HttpGet("kernels/{filter?}")]
 		public async Task<ActionResult<IEnumerable<OpenClKernelInfo>>> GetKernels(string filter = "")
 		{
 			if (this.openClService.KernelCompiler == null)
@@ -305,7 +305,7 @@ namespace OOCL.Api.Controllers
 			return this.Ok(kernels.Any() ? kernels : Array.Empty<OpenClKernelInfo>());
 		}
 
-		[HttpGet("executeMandelbrot/{kernel}/{version}/{width}/{height}/{zoom}/{x}/{y}/{coeff}/{r}/{g}/{b}/{copyGuid}/{allowTempSession}")]
+		[HttpGet("executeMandelbrot/{kernel?}/{version?}/{width?}/{height?}/{zoom?}/{x?}/{y?}/{coeff?}/{r?}/{g?}/{b?}/{allowTempSession?}")]
 		[ProducesResponseType(typeof(ImageObjInfo), 201)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -318,11 +318,10 @@ namespace OOCL.Api.Controllers
 	double zoom = 1.0,
 	double x = 0.0,
 	double y = 0.0,
-	int coeff = 8,
+	int coeff = 16,
 	int r = 0,
 	int g = 0,
 	int b = 0,
-	bool copyGuid = true,
 	bool allowTempSession = true)
 		{
 			bool temp = false;
@@ -382,12 +381,7 @@ namespace OOCL.Api.Controllers
 					});
 				}
 
-				if (copyGuid)
-				{
-					await this.clipboard.SetTextAsync(info.Id.ToString());
-				}
-
-				return this.Created($"api/image/images/{info.Id}/image64", info);
+				return this.Created($"api/image/{info.Id}/image64", info);
 			}
 			catch (Exception ex)
 			{
@@ -407,7 +401,7 @@ namespace OOCL.Api.Controllers
 			}
 		}
 
-		[HttpGet("executeTimestretch/{guid}/{kernel}/{version}/{factor}/{chunkSize}/{overlap}/{copyGuid}/{allowTempSession}")]
+		[HttpGet("executeTimestretch/{guid}/{factor}/{kernel?}/{version?}/{chunkSize?}/{overlap?}/{allowTempSession?}")]
 		[ProducesResponseType(typeof(AudioObjInfo), 201)]
 		[ProducesResponseType(typeof(ProblemDetails), 404)]
 		[ProducesResponseType(typeof(ProblemDetails), 400)]
@@ -419,7 +413,6 @@ namespace OOCL.Api.Controllers
 			double factor = 0.8,
 			int chunkSize = 16384,
 			float overlap = 0.5f,
-			bool copyGuid = true,
 			bool allowTempSession = true)
 		{
 			bool temp = false;
@@ -471,7 +464,7 @@ namespace OOCL.Api.Controllers
 				sw.Stop();
 
 				var info = await Task.Run(() => new AudioObjInfo(obj));
-				return this.Created($"api/audio/audios/{obj.Id}/info", info);
+				return this.Created($"api/audio/{obj.Id}/info", info);
 			}
 			catch (Exception ex)
 			{
