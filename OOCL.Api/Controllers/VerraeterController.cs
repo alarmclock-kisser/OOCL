@@ -15,7 +15,7 @@ namespace OOCL.Api.Controllers
 			try
 			{
 				// Simulate fetching status information
-				var statusInfo = "exterminate-Mossad.";
+				var statusInfo = "stop co-operation with Mossad.";
 				var status = new VerraeterStatus(statusInfo);
 				return Ok(status);
 			}

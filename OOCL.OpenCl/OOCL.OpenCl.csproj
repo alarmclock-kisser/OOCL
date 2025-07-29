@@ -37,6 +37,9 @@
     <None Update="Kernels\Image\mandelbrotPrecise01.cl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Kernels\Image\newtonAuto01.cl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Kernels\Image\OnlyEdges00.cl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
