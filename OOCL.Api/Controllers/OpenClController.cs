@@ -325,6 +325,7 @@ namespace OOCL.Api.Controllers
 	bool allowTempSession = true)
 		{
 			bool temp = false;
+			Stopwatch sw = Stopwatch.StartNew();
 
 			try
 			{
@@ -364,11 +365,9 @@ namespace OOCL.Api.Controllers
 				// Build variable arguments
 				object[] variableArgs = [0, 0, width, height, zoom, x, y, coeff, r, g, b];
 
-				Stopwatch sw = Stopwatch.StartNew();
 				var result = await Task.Run(() =>
 					this.openClService.ExecuteImageKernel(obj, kernel, version, variableArgs, true));
-				
-				sw.Stop();
+
 
 				var info = await Task.Run(() => new ImageObjInfo(obj));
 				if (!info.OnHost)
@@ -380,6 +379,8 @@ namespace OOCL.Api.Controllers
 						Status = 404
 					});
 				}
+
+				info.LastProcessingTime = sw.ElapsedMilliseconds;
 
 				return this.Created($"api/image/{info.Id}/image64", info);
 			}
@@ -394,6 +395,8 @@ namespace OOCL.Api.Controllers
 			}
 			finally
 			{
+				sw.Stop();
+				
 				if (temp)
 				{
 					await Task.Run(() => this.openClService.Dispose());
