@@ -90,20 +90,18 @@ namespace OOCL.Core
 
 			try
 			{
-				using (var imgClone = this.Img.CloneAs<Rgba32>())
-				using (var ms = new MemoryStream())
+				using var imgClone = this.Img.CloneAs<Rgba32>();
+				using var ms = new MemoryStream();
+				IImageEncoder encoder = format.ToLower() switch
 				{
-					IImageEncoder encoder = format.ToLower() switch
-					{
-						"png" => new SixLabors.ImageSharp.Formats.Png.PngEncoder(),
-						"jpeg" or "jpg" => new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder(),
-						"gif" => new SixLabors.ImageSharp.Formats.Gif.GifEncoder(),
-						_ => new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder()
-					};
+					"png" => new SixLabors.ImageSharp.Formats.Png.PngEncoder(),
+					"jpeg" or "jpg" => new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder(),
+					"gif" => new SixLabors.ImageSharp.Formats.Gif.GifEncoder(),
+					_ => new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder()
+				};
 
-					await imgClone.SaveAsync(ms, encoder);
-					return Convert.ToBase64String(ms.ToArray());
-				}
+				await imgClone.SaveAsync(ms, encoder);
+				return Convert.ToBase64String(ms.ToArray());
 			}
 			catch (Exception ex)
 			{
@@ -247,10 +245,8 @@ namespace OOCL.Core
 					}
 
 					// Save asynchronously with proper disposal
-					await using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
-					{
-						await clone.SaveAsync(fileStream, encoder);
-					}
+					await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+					await clone.SaveAsync(fileStream, encoder);
 				}
 
 				return filePath;

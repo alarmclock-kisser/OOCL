@@ -24,7 +24,7 @@ namespace OOCL.Core
 		private string timeStampFormat = "yyyy-MM-dd HH:mm:ss.fff";
 		public string TimeStampFormat
 		{
-			get => timeStampFormat;
+			get => this.timeStampFormat;
 			set
 			{
 				this.timeStampFormat = this.GetFormattedTime(value);

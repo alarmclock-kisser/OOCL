@@ -200,35 +200,33 @@ namespace OOCL.Core
 			{
 				if (!string.IsNullOrEmpty(this.Filepath) && File.Exists(this.Filepath))
 				{
-					using (var file = TagLib.File.Create(this.Filepath))
+					using var file = TagLib.File.Create(this.Filepath);
+					if (file.Tag.BeatsPerMinute > 0)
 					{
-						if (file.Tag.BeatsPerMinute > 0)
-						{
-							roughBpm = (float) file.Tag.BeatsPerMinute;
-						}
-						if (file.TagTypes.HasFlag(TagLib.TagTypes.Id3v2))
-						{
-							var id3v2Tag = (TagLib.Id3v2.Tag) file.GetTag(TagLib.TagTypes.Id3v2);
+						roughBpm = (float) file.Tag.BeatsPerMinute;
+					}
+					if (file.TagTypes.HasFlag(TagLib.TagTypes.Id3v2))
+					{
+						var id3v2Tag = (TagLib.Id3v2.Tag) file.GetTag(TagLib.TagTypes.Id3v2);
 
-							var tagTextFrame = TagLib.Id3v2.TextInformationFrame.Get(id3v2Tag, tag, false);
+						var tagTextFrame = TagLib.Id3v2.TextInformationFrame.Get(id3v2Tag, tag, false);
 
-							if (tagTextFrame != null && tagTextFrame.Text.Any())
+						if (tagTextFrame != null && tagTextFrame.Text.Any())
+						{
+							string bpmString = tagTextFrame.Text.FirstOrDefault() ?? "0,0";
+							if (!string.IsNullOrEmpty(bpmString))
 							{
-								string bpmString = tagTextFrame.Text.FirstOrDefault() ?? "0,0";
-								if (!string.IsNullOrEmpty(bpmString))
-								{
-									bpmString = bpmString.Replace(',', '.');
+								bpmString = bpmString.Replace(',', '.');
 
-									if (float.TryParse(bpmString, NumberStyles.Any, CultureInfo.InvariantCulture, out float parsedBpm))
-									{
-										bpm = parsedBpm;
-									}
+								if (float.TryParse(bpmString, NumberStyles.Any, CultureInfo.InvariantCulture, out float parsedBpm))
+								{
+									bpm = parsedBpm;
 								}
 							}
-							else
-							{
-								bpm = 0.0f;
-							}
+						}
+						else
+						{
+							bpm = 0.0f;
 						}
 					}
 				}
@@ -262,20 +260,18 @@ namespace OOCL.Core
 
 			try
 			{
-				using (var imgClone = this.WaveformImage.CloneAs<Rgba32>())
-				using (var ms = new MemoryStream())
+				using var imgClone = this.WaveformImage.CloneAs<Rgba32>();
+				using var ms = new MemoryStream();
+				IImageEncoder encoder = format.ToLower() switch
 				{
-					IImageEncoder encoder = format.ToLower() switch
-					{
-						"png" => new SixLabors.ImageSharp.Formats.Png.PngEncoder(),
-						"jpeg" or "jpg" => new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder(),
-						"gif" => new SixLabors.ImageSharp.Formats.Gif.GifEncoder(),
-						_ => new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder()
-					};
+					"png" => new SixLabors.ImageSharp.Formats.Png.PngEncoder(),
+					"jpeg" or "jpg" => new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder(),
+					"gif" => new SixLabors.ImageSharp.Formats.Gif.GifEncoder(),
+					_ => new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder()
+				};
 
-					await imgClone.SaveAsync(ms, encoder);
-					return Convert.ToBase64String(ms.ToArray());
-				}
+				await imgClone.SaveAsync(ms, encoder);
+				return Convert.ToBase64String(ms.ToArray());
 			}
 			catch (Exception ex)
 			{

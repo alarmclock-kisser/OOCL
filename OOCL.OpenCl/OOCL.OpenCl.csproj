@@ -35,6 +35,12 @@
     <None Update="Kernels\Audio\timestretch_float03.cl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Kernels\Crypto\aesDecrypt01.cl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Kernels\Crypto\aesEncrypt01.cl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Kernels\Image\mandelbrotPrecise01.cl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

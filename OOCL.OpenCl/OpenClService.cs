@@ -95,7 +95,7 @@ namespace OOCL.OpenCl
 				}
 			}
 		}
-		
+
 
 
 
@@ -104,7 +104,7 @@ namespace OOCL.OpenCl
 		public Dictionary<string, string> Names => this.GetNames();
 		public List<ClMem> MemoryObjects => this.GetMemoryObjectsAsync().Result;
 		public Dictionary<string, IntPtr> MemoryStats => this.GetMemoryStatsAsync().Result;
-		public float MemoryUsagePercentage =>  this.GetMemoryUsagePercentageAsync().Result;
+		public float MemoryUsagePercentage => this.GetMemoryUsagePercentageAsync().Result;
 
 
 		// Objects
@@ -166,7 +166,7 @@ namespace OOCL.OpenCl
 				this.Log("Disposed OpenCL context and resources.");
 			}
 
-            this.OnChange?.Invoke();
+			this.OnChange?.Invoke();
 		}
 
 		public void Log(string message = "", string inner = "", int indent = 0)
@@ -251,7 +251,7 @@ namespace OOCL.OpenCl
 		{
 			// Get all OpenCL devices & platforms
 			Dictionary<CLDevice, CLPlatform> devicesPlatforms = this.Devices;
-			
+
 			// Check if index is valid
 			if (index < 0 || index >= devicesPlatforms.Count)
 			{
@@ -267,7 +267,7 @@ namespace OOCL.OpenCl
 		{
 			// Get all OpenCL devices & platforms
 			Dictionary<CLDevice, CLPlatform> devicesPlatforms = this.Devices;
-			
+
 			// Check if index is valid
 			if (index < 0 || index >= devicesPlatforms.Count)
 			{
@@ -275,7 +275,7 @@ namespace OOCL.OpenCl
 
 				return null;
 			}
-			
+
 			// Get platform by index
 			return devicesPlatforms.Values.ElementAt(index);
 		}
@@ -345,7 +345,7 @@ namespace OOCL.OpenCl
 
 				return null;
 			}
-			
+
 			return Encoding.UTF8.GetString(infoCode).Trim('\0');
 		}
 
@@ -835,19 +835,19 @@ namespace OOCL.OpenCl
 		{
 			List<object> infoList = [];
 			List<string> desc = ["Name", "Vendor", "Version", "Profile", "Extensions"];
-			
+
 			if (this.PLAT == null)
 			{
 				this.Log("No OpenCL platform initialized.");
 				return [];
 			}
-			
+
 			infoList.Add(this.GetPlatformInfo<string>(this.PLAT.Value, PlatformInfo.Name) ?? "N/A");
 			infoList.Add(this.GetPlatformInfo<string>(this.PLAT.Value, PlatformInfo.Vendor) ?? "N/A");
 			infoList.Add(this.GetPlatformInfo<Version>(this.PLAT.Value, PlatformInfo.Version) ?? new());
 			infoList.Add(this.GetPlatformInfo<string>(this.PLAT.Value, PlatformInfo.Profile) ?? "N/A");
 			infoList.Add(this.GetPlatformInfo<string>(this.PLAT.Value, PlatformInfo.Extensions) ?? "N/A");
-			
+
 			// Create dictionary with platform info
 			return desc.Zip(infoList, (key, value) => new KeyValuePair<string, object>(key, value)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 		}
@@ -867,7 +867,7 @@ namespace OOCL.OpenCl
 					this.Log("Invalid index for OpenCL device selection");
 				}
 
-                this.OnChange?.Invoke();
+				this.OnChange?.Invoke();
 				return;
 			}
 
@@ -884,7 +884,7 @@ namespace OOCL.OpenCl
 					this.Log($"Failed to create OpenCL context: {this.lastError}");
 				}
 
-                this.OnChange?.Invoke();
+				this.OnChange?.Invoke();
 				return;
 			}
 			// Assuming CLCommandQueue is created within OpenClMemoryRegister constructor
@@ -899,7 +899,7 @@ namespace OOCL.OpenCl
 				this.Log($"Initialized OpenCL context for device {this.GetDeviceInfo(this.DEV, DeviceInfo.Name) ?? "N/A"} on platform {this.GetPlatformInfo(this.PLAT, PlatformInfo.Name) ?? "N/A"}");
 			}
 
-            this.OnChange?.Invoke();
+			this.OnChange?.Invoke();
 		}
 
 		public void Initialize(string deviceName, bool silent = false)
@@ -909,7 +909,7 @@ namespace OOCL.OpenCl
 			int index = -1;
 			for (int i = 0; i < devicesNames.Count; i++)
 			{
-				if (devicesNames[i].Equals(deviceName, StringComparison.OrdinalIgnoreCase) || 
+				if (devicesNames[i].Equals(deviceName, StringComparison.OrdinalIgnoreCase) ||
 					(this.PreferredDeviceName != string.Empty && devicesNames[i].Equals(this.PreferredDeviceName, StringComparison.OrdinalIgnoreCase)))
 				{
 					index = i;
@@ -1018,7 +1018,7 @@ namespace OOCL.OpenCl
 				var usage = await this.GetMemoryStatsAsync();
 				if (usage.TryGetValue("Total", out IntPtr total) && usage.TryGetValue("Used", out IntPtr used) && total != IntPtr.Zero)
 				{
-					return (float)used.ToInt64() / total.ToInt64();
+					return (float) used.ToInt64() / total.ToInt64();
 				}
 				else
 				{
@@ -1041,7 +1041,7 @@ namespace OOCL.OpenCl
 		}
 
 		public async Task<long> GetDeviceScore(CLDevice? device = null)
-			{
+		{
 			// Verify device
 			device ??= this.DEV;
 			if (device == null)
@@ -1160,8 +1160,8 @@ namespace OOCL.OpenCl
 				}
 				else if (obj.OnDevice)
 				{
-					byte[] bytes = this.MemoryRegister.PullData<byte>((nint)obj.Pointer);
-					
+					byte[] bytes = this.MemoryRegister.PullData<byte>((nint) obj.Pointer);
+
 					await obj.SetImage(bytes, false);
 				}
 			}
@@ -1175,7 +1175,7 @@ namespace OOCL.OpenCl
 				await Task.Yield();
 			}
 
-			return (nint)obj.Pointer;
+			return (nint) obj.Pointer;
 		}
 
 		public async Task<IntPtr> MoveAudio(AudioObj obj, int chunkSize = 16384, float overlap = 0.5f)
@@ -1217,7 +1217,7 @@ namespace OOCL.OpenCl
 				}
 				else if (obj.OnDevice)
 				{
-					chunks = this.MemoryRegister.PullChunks<float>((nint)obj.Pointer);
+					chunks = this.MemoryRegister.PullChunks<float>((nint) obj.Pointer);
 
 					await obj.AggregateStretchedChunks(chunks, false);
 				}
@@ -1236,7 +1236,7 @@ namespace OOCL.OpenCl
 				await Task.Yield();
 			}
 
-			return (nint)obj.Pointer;
+			return (nint) obj.Pointer;
 		}
 
 		public async Task<IntPtr> ExecuteAudioKernel(AudioObj obj, string kernelName = "normalize", string version = "00", int chunkSize = 0, float overlap = 0.0f, Dictionary<string, object>? optionalArguments = null, bool log = false)
@@ -1268,7 +1268,7 @@ namespace OOCL.OpenCl
 			}
 
 			// Execute kernel on device
-			obj.Pointer = this.KernelExecutioner.ExecuteAudioKernel((nint)obj.Pointer, out double factor, obj.Length, kernelName, version, chunkSize, overlap, obj.Samplerate, obj.Bitdepth, obj.Channels, optionalArguments);
+			obj.Pointer = this.KernelExecutioner.ExecuteAudioKernel((nint) obj.Pointer, out double factor, obj.Length, kernelName, version, chunkSize, overlap, obj.Samplerate, obj.Bitdepth, obj.Channels, optionalArguments);
 			if (obj.Pointer == IntPtr.Zero && log)
 			{
 				this.Log("Failed to execute audio kernel", "Pointer=" + obj.Pointer.ToString("X16"), 1);
@@ -1298,7 +1298,7 @@ namespace OOCL.OpenCl
 				this.Log("Executed audio kernel", "Pointer=" + obj.Pointer.ToString("X16") + ", Time: " + sw.ElapsedMilliseconds + "ms", 1);
 			}
 
-			return (nint)obj.Pointer;
+			return (nint) obj.Pointer;
 		}
 
 		public async Task<IntPtr> ExecuteImageKernel(ImageObj obj, string kernelBaseName = "mandelbrot", string kernelVersion = "00", object[]? variableArguments = null, bool log = false)
@@ -1356,7 +1356,7 @@ namespace OOCL.OpenCl
 			}
 
 			// Get parameters for call
-			IntPtr pointer = (nint)obj.Pointer;
+			IntPtr pointer = (nint) obj.Pointer;
 			int width = obj.Width;
 			int height = obj.Height;
 			int channels = obj.Channels;
@@ -1384,7 +1384,7 @@ namespace OOCL.OpenCl
 			if (obj.OnDevice && moved)
 			{
 				// Pull pixel bytes
-				byte[] pixels = this.MemoryRegister?.PullData<byte>((nint)obj.Pointer) ?? [];
+				byte[] pixels = this.MemoryRegister?.PullData<byte>((nint) obj.Pointer) ?? [];
 				if (pixels == null || pixels.LongLength == 0)
 				{
 					if (this.EnableLogging)
@@ -1419,7 +1419,7 @@ namespace OOCL.OpenCl
 			}
 
 			// Perform FFT on device
-			obj.Pointer = this.KernelExecutioner?.ExecuteFFT((nint)obj.Pointer, version, obj.Form.FirstOrDefault(), chunkSize, overlap, true) ?? obj.Pointer;
+			obj.Pointer = this.KernelExecutioner?.ExecuteFFT((nint) obj.Pointer, version, obj.Form.FirstOrDefault(), chunkSize, overlap, true) ?? obj.Pointer;
 
 			if (obj.Pointer == IntPtr.Zero)
 			{
@@ -1434,7 +1434,7 @@ namespace OOCL.OpenCl
 				obj.Form = obj.Form.StartsWith("f") ? "c" : "f";
 			}
 
-			return (nint)obj.Pointer;
+			return (nint) obj.Pointer;
 		}
 
 		public async Task<AudioObj> TimeStretch(AudioObj obj, string kernelName = "timestretch_double", string version = "03", double factor = 1.000d, int chunkSize = 16384, float overlap = 0.5f)
@@ -1481,7 +1481,7 @@ namespace OOCL.OpenCl
 				}
 
 				// Execute time stretch kernel
-				var ptr  = await this.ExecuteAudioKernel(obj, kernelName, "", chunkSize, overlap, optionalArgs, true);
+				var ptr = await this.ExecuteAudioKernel(obj, kernelName, "", chunkSize, overlap, optionalArgs, true);
 				if (ptr == IntPtr.Zero)
 				{
 					this.Log("Failed to execute time stretch kernel.", "Pointer=" + ptr.ToString("X16"));
@@ -1508,6 +1508,89 @@ namespace OOCL.OpenCl
 				await Task.Yield();
 			}
 
+			return obj;
+		}
+
+		public async Task<CryptoObj> Encrypt(CryptoObj obj, string kernelName = "aesEncrypt", string version = "01", string keyphrase = "", int bits = 256)
+		{
+			if (this.KernelExecutioner == null || this.MemoryRegister == null)
+			{
+				this.Log("OpenCL is not initialized.");
+				return obj;
+			}
+
+			var ptr = this.MemoryRegister.PushData<byte>(obj.GetClearMessageBytes())?.indexHandle ?? IntPtr.Zero;
+			if (ptr == IntPtr.Zero)
+			{
+				this.Log("Failed to push data to OpenCL memory.");
+				return obj;
+			}
+
+			// Build arguments
+			Dictionary<string, object> optionalArgs = new()
+			{
+				{ "pointer", ptr },
+				{ "keyphrase", keyphrase },
+				{ "bits", bits }
+			};
+
+			// Execute kernel
+			IntPtr resultPointer = await this.KernelExecutioner.ExecuteKernelOnPtr(ptr, kernelName, version, optionalArgs);
+			if (resultPointer == IntPtr.Zero)
+			{
+				this.Log("Failed to execute encryption kernel.", "Pointer=" + resultPointer.ToString("X16"));
+				return obj;
+			}
+
+			// Set encrypted message
+			obj.SetEncryptedMessage(this.MemoryRegister.PullData<byte>(resultPointer));
+
+			if (this.EnableLogging)
+			{
+				this.Log("Encryption completed successfully.", "Pointer=" + resultPointer.ToString("X16"));
+			}
+
+			return obj;
+		}
+
+		public async Task<CryptoObj> Decrypt(CryptoObj obj, string kernelName = "aesDecrypt", string version = "01", string keyphrase = "", int bits = 256)
+		{
+			if (this.KernelExecutioner == null || this.MemoryRegister == null)
+			{
+				this.Log("OpenCL is not initialized.");
+				return obj;
+			}
+			
+			var ptr = this.MemoryRegister.PushData<byte>(obj.GetEncryptedMessageBytes())?.indexHandle ?? IntPtr.Zero;
+			if (ptr == IntPtr.Zero)
+			{
+				this.Log("Failed to push data to OpenCL memory.");
+				return obj;
+			}
+			
+			// Build arguments
+			Dictionary<string, object> optionalArgs = new()
+			{
+				{ "pointer", ptr },
+				{ "keyphrase", keyphrase },
+				{ "bits", bits }
+			};
+
+			// Execute kernel
+			IntPtr resultPointer = await this.KernelExecutioner.ExecuteKernelOnPtr(ptr, kernelName, version, optionalArgs);
+			if (resultPointer == IntPtr.Zero)
+			{
+				this.Log("Failed to execute decryption kernel.", "Pointer=" + resultPointer.ToString("X16"));
+				return obj;
+			}
+
+			// Set decrypted message
+			obj.SetClearMessage(this.MemoryRegister.PullData<byte>(resultPointer));
+			if (this.EnableLogging)
+			{
+				this.Log("Decryption completed successfully.", "Pointer=" + resultPointer.ToString("X16"));
+			}
+			
 			return obj;
 		}
 	}

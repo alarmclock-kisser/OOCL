@@ -612,11 +612,11 @@ namespace OOCL.OpenCl
 		private IntPtr size => (nint) this.lengths.Sum(length => length.ToInt64() * this.TypeSize);
 		public string Size => this.size.ToString();
 		
-		private IntPtr[] pointers => this.Buffers.Select(buffer => buffer.Handle).ToArray();
+		public IntPtr[] pointers => this.Buffers.Select(buffer => buffer.Handle).ToArray();
 		public IEnumerable<string> Pointers => this.pointers.Select(p => p.ToString(this.formatting));
 
 
-		private IntPtr indexHandle => this.Buffers.FirstOrDefault().Handle;
+		public IntPtr indexHandle => this.Buffers.FirstOrDefault().Handle;
 		public string IndexHandle => this.indexHandle.ToString(this.formatting);
 		
 		private IntPtr indexLength => this.lengths.FirstOrDefault();

@@ -1118,9 +1118,120 @@ namespace OOCL.OpenCl
 			}
 		}
 
+		public async Task<IntPtr> ExecuteKernelOnPtr(IntPtr ptr, string kernelName = "", string kernelVersion = "00", Dictionary<string, object>? arguments = null)
+		{
+			// Find kernel file
+			string kernelPath = this.KernelCompiler.KernelFiles.FirstOrDefault(f => f.ToLower().Contains((kernelName + kernelVersion).ToLower())) ?? "";
+			if (string.IsNullOrEmpty(kernelPath))
+			{
+				this.Log("Kernel file not found: " + kernelName + kernelVersion, "", 2);
+				return ptr;
+			}
+
+			// Load kernel
+			this.KernelCompiler.LoadKernel("", kernelPath);
+			if (this.Kernel == null || this.KernelFile == null)
+			{
+				if (this.EnableLogging)
+				{
+					this.Log("Kernel not loaded: " + kernelName, "", 2);
+				}
+				return ptr;
+			}
+
+			// Get input buffer
+			ClMem? inputMem = this.MemoryRegister.GetBuffer(ptr);
+			if (inputMem == null || inputMem.GetCount() <= 0 || inputMem.GetLengths().Any(l => l < 1))
+			{
+				if (this.EnableLogging)
+				{
+					this.Log("Input buffer not found or invalid length: " + ptr.ToString("X16"), "", 2);
+				}
+				return ptr;
+			}
+
+			// Set arguments (iterate through arguments & set if name matches)
+			arguments ??= [];
+			string[] argNames = this.KernelCompiler.ArgumentNames.ToArray();
+			for (uint i = 0; i < argNames.Length; i++)
+			{
+				string argName = argNames[i];
+				if (arguments.TryGetValue(argName, out object? value))
+				{
+					CLResultCode err = this.SetKernelArgSafe(i, value);
+					if (err != CLResultCode.Success)
+					{
+						this.lastError = err;
+						if (this.EnableLogging)
+						{
+							this.Log($"Failed to set kernel argument {i} ({argName}): " + err, "", 2);
+						}
+						return ptr;
+					}
+				}
+			}
+
+			// Get work dimensions
+			uint maxWorkGroupSize = this.GetMaxWorkGroupSize();
+			uint globalWorkSize = (uint) inputMem.GetLengths().FirstOrDefault();
+			uint localWorkSize = Math.Min(maxWorkGroupSize, globalWorkSize);
+			if (localWorkSize == 0)
+			{
+				localWorkSize = 1; // Fallback to 1 if no valid local size
+			}
+			if (globalWorkSize < localWorkSize)
+			{
+				globalWorkSize = localWorkSize; // Ensure global size is at least local size
+			}
+
+			// Execute kernel
+			CLResultCode error = CL.EnqueueNDRangeKernel(this.QUE, this.Kernel.Value, 1, null, [(UIntPtr) globalWorkSize], [(UIntPtr) localWorkSize], 0, null, out CLEvent evt);
+			if (error != CLResultCode.Success)
+			{
+				this.lastError = error;
+				if (this.EnableLogging)
+				{
+					this.Log($"Failed to enqueue kernel: " + error, "", 2);
+				}
+				return ptr;
+			}
+
+			// Wait for completion
+			error = CL.WaitForEvents(1, [evt]);
+			if (error != CLResultCode.Success)
+			{
+				this.lastError = error;
+				if (this.EnableLogging)
+				{
+					this.Log($"Wait failed: " + error, "", 2);
+				}
+				return ptr;
+			}
+
+			// Release event
+			error = CL.ReleaseEvent(evt);
+			if (error != CLResultCode.Success)
+			{
+				this.lastError = error;
+				if (this.EnableLogging)
+				{
+					this.Log($"Failed to release event: " + error, "", 2);
+				}
+				return ptr;
+			}
+
+			// Log success
+			if (this.EnableLogging)
+			{
+				this.Log($"Executed kernel '{kernelName}' successfully on buffer {ptr.ToString("X16")} with size {globalWorkSize}", "", 1);
+			}
+
+			// Return pointer
+			return inputMem.indexHandle;
+		}
 
 
 		// ----- ----- ----- ACCESSIBLE METHODS ----- ----- ----- \\
-		
+
 	}
-}
+	}
