@@ -15,11 +15,11 @@ namespace OOCL.Api.Controllers
 			this.openClService = openClService;
 		}
 
-		[HttpGet("encrypt")]
-		public async Task<CryptoObjInfo> Encrypt(string message, string keyphrase, int bits = 256)
+		[HttpGet("encrypt/{keyphrase}/{message}")]
+		public async Task<CryptoObjInfo> Encrypt(string message, string keyphrase)
 		{
 			// Create new CryptoObj
-			var cryptoObj = new Core.CryptoObj(message, "AES", bits, keyphrase);
+			var cryptoObj = await Task.Run(() => new Core.CryptoObj(message, "AES", 256, keyphrase));
 
 			// Encrypt the message
 			// cryptoObj = await this.openClService.Encrypt(cryptoObj, "aesEncrypt", "01", keyphrase, bits);
@@ -28,11 +28,11 @@ namespace OOCL.Api.Controllers
 			return new CryptoObjInfo(cryptoObj);
 		}
 
-		[HttpGet("decrypt")]
-		public async Task<CryptoObjInfo> Decrypt(string encryptedMessage, string keyphrase, int bits = 256)
+		[HttpGet("decrypt/{keyphrase}/{encryptedMessage}")]
+		public async Task<CryptoObjInfo> Decrypt(string encryptedMessage, string keyphrase)
 		{
 			// Create new CryptoObj
-			var cryptoObj = new Core.CryptoObj("", "AES", bits);
+			var cryptoObj = await Task.Run(() => new Core.CryptoObj("", "AES", 256));
 			cryptoObj.SetEncryptedMessage(encryptedMessage);
 			cryptoObj.Decrypt(keyphrase);
 
