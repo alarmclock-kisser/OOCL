@@ -27,7 +27,7 @@ namespace OOCL.WebApp
 			// Add ApiClient (ctor string is the base URL)
 			builder.Services.AddHttpClient<OOCL.Client.ApiClient>(client =>
 			{
-				client.BaseAddress = new Uri("https://api.oocl.work");
+				client.BaseAddress = new Uri("https://api.oocl.work:7171");
 			});
 
 			// BUILD
@@ -58,7 +58,7 @@ namespace OOCL.WebApp
 
 	public class ApiUrlConfig
 	{
-		public string Url { get; set; } = "https://localhost:5115";
+		public string Url { get; set; } = "https://localhost:7171";
 
 		public ApiUrlConfig(string baseUrl = "")
 		{

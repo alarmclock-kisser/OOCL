@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OOCL.Core\OOCL.Core.csproj" />
     <ProjectReference Include="..\OOCL.OpenCl\OOCL.OpenCl.csproj" />
   </ItemGroup>
